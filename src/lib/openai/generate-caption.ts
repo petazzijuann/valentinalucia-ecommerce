@@ -1,4 +1,4 @@
-import { openai } from "./client";
+import { getOpenAI } from "./client";
 import { formatARS } from "@/lib/utils";
 
 interface CaptionInput {
@@ -10,30 +10,30 @@ interface CaptionInput {
 }
 
 export async function generateInstagramCaption(product: CaptionInput): Promise<string> {
-  const completion = await openai.chat.completions.create({
+  const completion = await getOpenAI().chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
         content:
-          "Sos el community manager de VALENTINA LUCIA, marca de indumentaria urbano-elegante argentina. " +
-          "Escribís captions de Instagram que combinan estética editorial con copy de ventas efectivo. " +
+          "Sos el community manager de Valentina Lucia, marca de indumentaria femenina argentina. " +
+          "Escribis captions de Instagram que combinan estetica editorial con copy de ventas efectivo. " +
           "Tono: seguro, aspiracional y directo. Español rioplatense sin emojis excesivos. " +
-          "Formato obligatorio (respetá exactamente el orden):\n" +
-          "1. Hook de 1-2 líneas (máx. 80 chars)\n" +
-          "2. Línea vacía\n" +
-          "3. Descripción de 1-2 oraciones\n" +
-          "4. Línea vacía\n" +
+          "Formato obligatorio (respeta exactamente el orden):\n" +
+          "1. Hook de 1-2 lineas (max. 80 chars)\n" +
+          "2. Linea vacia\n" +
+          "3. Descripcion de 1-2 oraciones\n" +
+          "4. Linea vacia\n" +
           "5. Precio y CTA (usa exactamente: 💰 [precio] | 🔗 Link en bio)\n" +
           "NO incluyas hashtags — se agregan por separado.\n" +
-          "Respondé SOLO con el texto, sin comillas.",
+          "Responde SOLO con el texto, sin comillas.",
       },
       {
         role: "user",
         content:
           `Producto: "${product.name}"\n` +
-          `Categoría: ${product.category}\n` +
-          `Descripción: ${product.description}\n` +
+          `Categoria: ${product.category}\n` +
+          `Descripcion: ${product.description}\n` +
           `Precio: ${formatARS(product.price_sale)}\n` +
           `Tags: ${product.tags.join(", ")}`,
       },
@@ -45,8 +45,8 @@ export async function generateInstagramCaption(product: CaptionInput): Promise<s
   const body = (completion.choices[0].message.content ?? "").trim();
 
   const hashtags = [
-    "#VALENTINA LUCIA",
-    "#VALENTINA LUCIA_arg",
+    "#valentinalucia",
+    "#valentinalucia_arg",
     `#${product.category}`,
     ...product.tags.map((t) => `#${t.replace(/\s+/g, "").toLowerCase()}`),
     "#modaargentina",
@@ -54,7 +54,7 @@ export async function generateInstagramCaption(product: CaptionInput): Promise<s
     "#ootd",
     "#indumentaria",
   ]
-    .filter((v, i, a) => a.indexOf(v) === i) // dedupe
+    .filter((v, i, a) => a.indexOf(v) === i)
     .join(" ");
 
   return `${body}\n\n${hashtags}`;

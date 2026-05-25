@@ -1,9 +1,11 @@
 import OpenAI from "openai";
 
-const globalForOpenAI = globalThis as unknown as { openai: OpenAI };
+let _instance: OpenAI | null = null;
 
-export const openai =
-  globalForOpenAI.openai ??
-  new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-if (process.env.NODE_ENV !== "production") globalForOpenAI.openai = openai;
+/** Retorna el cliente OpenAI. Se crea solo cuando se llama por primera vez (lazy). */
+export function getOpenAI(): OpenAI {
+  if (!_instance) {
+    _instance = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+  }
+  return _instance;
+}
