@@ -6,7 +6,13 @@ import Image from "next/image";
 const SLIDES = [
   { src: "/publicidades/carrusel/imagen-1.jpeg", alt: "Campaña Valentina Lucia 1" },
   { src: "/publicidades/carrusel/imagen-2.jpeg", alt: "Campaña Valentina Lucia 2" },
-  // Agregá más imágenes acá: imagen-3.jpeg, imagen-4.jpeg, etc.
+  { src: "/publicidades/carrusel/imagen-3.jpeg", alt: "Campaña Valentina Lucia 3" },
+  { src: "/publicidades/carrusel/imagen-4.jpeg", alt: "Campaña Valentina Lucia 4" },
+  { src: "/publicidades/carrusel/imagen-5.jpeg", alt: "Campaña Valentina Lucia 5" },
+  { src: "/publicidades/carrusel/imagen-6.jpeg", alt: "Campaña Valentina Lucia 6" },
+  { src: "/publicidades/carrusel/imagen-7.jpeg", alt: "Campaña Valentina Lucia 7" },
+  { src: "/publicidades/carrusel/imagen-8.jpeg", alt: "Campaña Valentina Lucia 8" },
+  { src: "/publicidades/carrusel/imagen-9.jpeg", alt: "Campaña Valentina Lucia 9" },
 ];
 
 // [clone-of-last, ...real slides, clone-of-first]

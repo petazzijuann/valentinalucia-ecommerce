@@ -72,7 +72,17 @@ export default async function HomePage() {
         ]}
       />
 
-      {/* 7. Nuestra esencia */}
+      {/* 7. Sección Accesorios */}
+      <SeccionEditorial
+        label="COLECCIÓN"
+        title="ACCESORIOS"
+        images={[
+          { src: "/publicidades/accesorios/imagen-1.jpeg", alt: "Accesorios Valentina Lucia - imagen 1" },
+          { src: "/publicidades/accesorios/imagen-2.jpeg", alt: "Accesorios Valentina Lucia - imagen 2" },
+        ]}
+      />
+
+      {/* 8. Nuestra esencia */}
       <EssenceSection />
     </>
   );

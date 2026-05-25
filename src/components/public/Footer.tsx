@@ -1,5 +1,4 @@
 ﻿import Link from "next/link";
-import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -8,14 +7,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
           <div>
-            <Image
-              src="/logo.png"
-              alt="Valentina Lucia"
-              width={160}
-              height={64}
-              className="h-12 w-auto object-contain mb-3"
-              style={{ filter: "brightness(0) saturate(100%) invert(88%) sepia(18%) saturate(400%) hue-rotate(295deg) brightness(108%)" }}
-            />
+            <p className="font-bebas text-2xl text-brand-cream tracking-widest mb-2">
+              VALENTINA LUCIA
+            </p>
             <p className="text-sm">Indumentaria femenina. Rosario, Santa Fe.</p>
             <p className="text-sm mt-1 text-xs opacity-70">Fundada en 2026.</p>
           </div>
