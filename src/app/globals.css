@@ -5,11 +5,11 @@
 
 /* ── VALENTINA LUCIA Design Tokens ─────────────────────────────────── */
 :root {
-  --brand-green: #1b3022;
-  --brand-cream: #e2e2d2;
-  --green-dark:  #0f1f14;
-  --green-mid:   #2d4a35;
-  --cream-dark:  #c8c8b8;
+  --brand-green: #860016;   /* vino/borgoña — color primario de marca      */
+  --brand-cream: #ffdee3;   /* rosa suave   — color secundario de marca     */
+  --green-dark:  #5a000f;   /* vino oscuro                                  */
+  --green-mid:   #9e0019;   /* vino medio                                   */
+  --cream-dark:  #f4b8c3;   /* rosa más profundo                            */
   --black:       #0a0a0a;
   --white:       #fafafa;
   --error:       #c0392b;
@@ -22,36 +22,36 @@
   --card-foreground:     #0a0a0a;
   --popover:             #ffffff;
   --popover-foreground:  #0a0a0a;
-  --primary:             #1b3022;
-  --primary-foreground:  #e2e2d2;
-  --secondary:           #e2e2d2;
-  --secondary-foreground:#1b3022;
-  --muted:               #f5f5f0;
+  --primary:             #860016;
+  --primary-foreground:  #ffdee3;
+  --secondary:           #ffdee3;
+  --secondary-foreground:#860016;
+  --muted:               #fff5f7;
   --muted-foreground:    #737370;
-  --accent:              #2d4a35;
-  --accent-foreground:   #e2e2d2;
+  --accent:              #9e0019;
+  --accent-foreground:   #ffdee3;
   --destructive:         #c0392b;
-  --border:              #d4d4cc;
-  --input:               #d4d4cc;
-  --ring:                #1b3022;
+  --border:              #f4b8c3;
+  --input:               #f4b8c3;
+  --ring:                #860016;
   --radius:              0rem;
 
   /* charts */
-  --chart-1: #1b3022;
-  --chart-2: #2d4a35;
-  --chart-3: #c8c8b8;
-  --chart-4: #e2e2d2;
-  --chart-5: #0f1f14;
+  --chart-1: #860016;
+  --chart-2: #9e0019;
+  --chart-3: #f4b8c3;
+  --chart-4: #ffdee3;
+  --chart-5: #5a000f;
 
   /* sidebar admin */
-  --sidebar:                    #1b3022;
-  --sidebar-foreground:         #e2e2d2;
-  --sidebar-primary:            #e2e2d2;
-  --sidebar-primary-foreground: #1b3022;
-  --sidebar-accent:             #2d4a35;
-  --sidebar-accent-foreground:  #e2e2d2;
-  --sidebar-border:             #2d4a35;
-  --sidebar-ring:               #e2e2d2;
+  --sidebar:                    #860016;
+  --sidebar-foreground:         #ffdee3;
+  --sidebar-primary:            #ffdee3;
+  --sidebar-primary-foreground: #860016;
+  --sidebar-accent:             #9e0019;
+  --sidebar-accent-foreground:  #ffdee3;
+  --sidebar-border:             #9e0019;
+  --sidebar-ring:               #ffdee3;
 }
 
 @theme inline {
@@ -67,10 +67,10 @@
   --color-green-dark:     var(--green-dark);
   --color-green-mid:      var(--green-mid);
   --color-cream-dark:     var(--cream-dark);
-  --color-VALENTINA LUCIA-black:  var(--black);
-  --color-VALENTINA LUCIA-white:  var(--white);
-  --color-VALENTINA LUCIA-error:  var(--error);
-  --color-VALENTINA LUCIA-success:var(--success);
+  --color-vl-black:       var(--black);
+  --color-vl-white:       var(--white);
+  --color-vl-error:       var(--error);
+  --color-vl-success:     var(--success);
 
   /* shadcn tokens */
   --color-card:                  var(--card);
