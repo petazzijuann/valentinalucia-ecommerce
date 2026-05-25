@@ -1,4 +1,4 @@
-﻿import type { DashboardMetrics } from "@/types";
+import type { DashboardMetrics } from "@/types";
 import { formatARS } from "@/lib/utils";
 
 type Product = DashboardMetrics["top_products"][number];

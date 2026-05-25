@@ -1,4 +1,4 @@
-﻿import { notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, Clock } from "lucide-react";
 import { prisma } from "@/lib/prisma/client";

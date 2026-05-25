@@ -1,4 +1,4 @@
-﻿import { openai } from "./client";
+import { openai } from "./client";
 
 interface GeneratedContent {
   description: string;

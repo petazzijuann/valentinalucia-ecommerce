@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRef } from "react";
 import { Mail, AtSign, MessageCircle } from "lucide-react";

@@ -1,4 +1,4 @@
-﻿import type { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL ?? "https://valentinalucia.com.ar";
 

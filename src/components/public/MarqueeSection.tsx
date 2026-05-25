@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 const TEXT = "VALENTINA LUCIA · NUEVA COLECCIÓN · URBANO ELEGANTE · MADE IN ARGENTINA · ";
 

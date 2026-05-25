@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma/client";
 import TiendaHeader from "@/components/public/TiendaHeader";
 import FiltrosBarra from "@/components/public/FiltrosBarra";

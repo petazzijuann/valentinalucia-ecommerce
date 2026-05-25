@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect } from "react";
 import { X, Trash2, ShoppingBag } from "lucide-react";

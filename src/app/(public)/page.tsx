@@ -1,4 +1,4 @@
-﻿import { prisma } from "@/lib/prisma/client";
+import { prisma } from "@/lib/prisma/client";
 import HeroSection from "@/components/public/HeroSection";
 import MarqueeSection from "@/components/public/MarqueeSection";
 import AnimatedProductGrid from "@/components/public/AnimatedProductGrid";

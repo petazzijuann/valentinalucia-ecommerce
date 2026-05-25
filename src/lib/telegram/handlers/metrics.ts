@@ -1,4 +1,4 @@
-﻿import type { Context } from "telegraf";
+import type { Context } from "telegraf";
 import { prisma } from "@/lib/prisma/client";
 import { formatARS } from "@/lib/utils";
 

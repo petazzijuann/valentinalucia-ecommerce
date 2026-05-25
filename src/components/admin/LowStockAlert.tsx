@@ -1,4 +1,4 @@
-﻿import type { DashboardMetrics } from "@/types";
+import type { DashboardMetrics } from "@/types";
 
 type Item = DashboardMetrics["low_stock"][number];
 

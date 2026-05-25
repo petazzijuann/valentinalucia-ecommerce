@@ -1,4 +1,4 @@
-﻿import { openai } from "./client";
+import { openai } from "./client";
 import { formatARS } from "@/lib/utils";
 
 interface CaptionInput {
