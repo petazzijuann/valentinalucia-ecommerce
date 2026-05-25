@@ -52,23 +52,23 @@ export default async function HomePage() {
       {/* 4. Últimos productos */}
       <AnimatedProductGrid products={products} />
 
-      {/* 5. Sección Urbano */}
+      {/* 5. Sección Basic */}
       <SeccionEditorial
         label="COLECCIÓN"
-        title="URBANO"
+        title="BASIC"
         images={[
-          { src: "/publicidades/urbano/imagen-1.jpeg", alt: "Colección Urbano VALENTINA LUCIA - imagen 1" },
-          { src: "/publicidades/urbano/imagen-2.jpeg", alt: "Colección Urbano VALENTINA LUCIA - imagen 2" },
+          { src: "/publicidades/basic/imagen-1.jpeg", alt: "Colección Basic Valentina Lucia - imagen 1" },
+          { src: "/publicidades/basic/imagen-2.jpeg", alt: "Colección Basic Valentina Lucia - imagen 2" },
         ]}
       />
 
-      {/* 6. Sección Old Money */}
+      {/* 6. Sección Night */}
       <SeccionEditorial
         label="COLECCIÓN"
-        title="OLD MONEY"
+        title="NIGHT"
         images={[
-          { src: "/publicidades/oldmoney/imagen-1.jpeg", alt: "Colección Old Money VALENTINA LUCIA - imagen 1" },
-          { src: "/publicidades/oldmoney/imagen-2.jpeg", alt: "Colección Old Money VALENTINA LUCIA - imagen 2" },
+          { src: "/publicidades/night/imagen-1.jpeg", alt: "Colección Night Valentina Lucia - imagen 1" },
+          { src: "/publicidades/night/imagen-2.jpeg", alt: "Colección Night Valentina Lucia - imagen 2" },
         ]}
       />
 
