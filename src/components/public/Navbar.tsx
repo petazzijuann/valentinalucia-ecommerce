@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ShoppingBag, Menu, X, Search, ChevronDown } from "lucide-react";
@@ -121,16 +120,8 @@ export default function Navbar() {
         <div className="flex items-center h-16 gap-8">
 
           {/* Logo */}
-          <Link href="/" className="shrink-0 flex items-center" aria-label="Valentina Lucia — Inicio">
-            <Image
-              src="/logo.png"
-              alt="Valentina Lucia"
-              width={140}
-              height={56}
-              priority
-              className="h-10 w-auto object-contain"
-              style={{ filter: "brightness(0) saturate(100%) invert(88%) sepia(18%) saturate(400%) hue-rotate(295deg) brightness(108%)" }}
-            />
+          <Link href="/" className="font-bebas text-2xl tracking-widest hover:text-white transition-colors shrink-0">
+            VALENTINA LUCIA
           </Link>
 
           {/* Derecha */}

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRef } from "react";
 import Link from "next/link";
@@ -49,10 +49,14 @@ export default function HeroSection() {
           NUEVA COLECCIÓN
         </p>
 
-        <h1 className="font-bebas text-[clamp(80px,15vw,160px)] text-brand-cream leading-none tracking-wide">
-          {TITLE.split("").map((letter, i) => (
-            <span key={i} className="hero-letter inline-block">
-              {letter === " " ? " " : letter}
+        <h1 className="font-bebas text-[clamp(80px,15vw,160px)] text-brand-cream leading-none tracking-wide flex flex-wrap justify-center gap-x-[0.25em]">
+          {TITLE.split(" ").map((word, wi) => (
+            <span key={wi} className="whitespace-nowrap inline-block">
+              {word.split("").map((letter, li) => (
+                <span key={li} className="hero-letter inline-block">
+                  {letter}
+                </span>
+              ))}
             </span>
           ))}
         </h1>
