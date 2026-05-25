@@ -8,6 +8,8 @@ export type BotState =
   | "upload_waiting_stock"
   | "upload_waiting_price_sale"
   | "upload_waiting_price_cost"
+  | "upload_waiting_description"
+  | "upload_waiting_tags"
   | "upload_confirming"
   | "sale_waiting_search"
   | "sale_waiting_size"
@@ -28,14 +30,14 @@ export interface UploadData {
 }
 
 export interface SaleData {
-  product_id?:     string;
-  product_name?:   string;
-  product_cost?:   number;
+  product_id?:      string;
+  product_name?:    string;
+  product_cost?:    number;
   suggested_price?: number;
-  size?:           string;
-  quantity?:       number;
-  sale_price?:     number;
-  payment_method?: string;
+  size?:            string;
+  quantity?:        number;
+  sale_price?:      number;
+  payment_method?:  string;
 }
 
 export interface BotSessionData {

@@ -2,8 +2,7 @@ import type { Context } from "telegraf";
 import slugify from "slugify";
 import { prisma } from "@/lib/prisma/client";
 import { uploadToCloudinary } from "@/lib/cloudinary/upload";
-import { generateProductContent } from "@/lib/openai/generate-description";
-import { getSession, setSession, clearSession, type BotSessionData } from "../state";
+import { getSession, setSession, clearSession } from "../state";
 import { formatARS } from "@/lib/utils";
 
 const CATEGORIES = ["remeras", "pantalones", "buzos", "accesorios", "calzado"];
@@ -23,7 +22,6 @@ const CATEGORY_KEYBOARD = {
 };
 
 function parseStock(text: string): Record<string, number> | null {
-  // Acepta "S:2 M:3 L:5 XL:2" o "S 2 M 3 L 5"
   const stock: Record<string, number> = {};
   const pairs = text.toUpperCase().match(/([A-Z]+)\s*[:\s]\s*(\d+)/g);
   if (!pairs || pairs.length === 0) return null;
@@ -92,6 +90,7 @@ export async function handleText(ctx: Context) {
   const text = (ctx.message as { text?: string })?.text?.trim() ?? "";
 
   switch (session.state) {
+
     case "upload_waiting_name": {
       await setSession(chatId, {
         ...session,
@@ -143,28 +142,55 @@ export async function handleText(ctx: Context) {
         await ctx.reply("❌ Precio inválido. Enviá un número, ej: 12000");
         return;
       }
-
-      const waiting = await ctx.reply("🤖 Generando descripción con IA...");
-      const { description, tags } = await generateProductContent(
-        session.uploadData?.name ?? "",
-        session.uploadData?.category ?? ""
+      await setSession(chatId, {
+        ...session,
+        state: "upload_waiting_description",
+        uploadData: { ...session.uploadData, price_cost: cost },
+      });
+      await ctx.reply(
+        "📝 ¿Descripción del producto?\n_(Ej: Remera oversize de algodón premium, corte relajado.)_",
+        { parse_mode: "Markdown" }
       );
-      await ctx.telegram.deleteMessage(ctx.chat!.id, waiting.message_id);
+      break;
+    }
+
+    case "upload_waiting_description": {
+      await setSession(chatId, {
+        ...session,
+        state: "upload_waiting_tags",
+        uploadData: { ...session.uploadData, description: text },
+      });
+      await ctx.reply(
+        "🔖 ¿Tags? Escribilos separados por coma.\n_(Ej: oversize, algodón, básico, verano)_",
+        { parse_mode: "Markdown" }
+      );
+      break;
+    }
+
+    case "upload_waiting_tags": {
+      const tags = text
+        .split(",")
+        .map((t) => t.trim().toLowerCase())
+        .filter((t) => t.length > 0);
+
+      if (tags.length === 0) {
+        await ctx.reply("❌ Escribí al menos un tag, ej: básico, verano");
+        return;
+      }
 
       const updatedData = {
         ...session.uploadData,
-        price_cost: cost,
-        description,
         tags,
       };
+
       await setSession(chatId, {
         state: "upload_confirming",
         uploadData: updatedData,
       });
 
-      const margin = Math.round(
-        ((updatedData.price_sale! - cost) / updatedData.price_sale!) * 100
-      );
+      const margin = updatedData.price_sale && updatedData.price_cost
+        ? Math.round(((updatedData.price_sale - updatedData.price_cost) / updatedData.price_sale) * 100)
+        : 0;
 
       await ctx.reply(
         `*Vista previa del producto:*\n\n` +
@@ -172,8 +198,8 @@ export async function handleText(ctx: Context) {
         `🏷 Categoría: ${updatedData.category}\n` +
         `📦 Stock: ${stockSummary(updatedData.stock ?? {})}\n` +
         `💰 Venta: ${formatARS(updatedData.price_sale!)}\n` +
-        `🔒 Costo: ${formatARS(cost)} _(margen ${margin}%)_\n\n` +
-        `📝 _${description}_\n` +
+        `🔒 Costo: ${formatARS(updatedData.price_cost!)} _(margen ${margin}%)_\n\n` +
+        `📝 _${updatedData.description}_\n` +
         `🔖 ${tags.join(", ")}`,
         {
           parse_mode: "Markdown",
