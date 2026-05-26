@@ -12,17 +12,10 @@ export const revalidate    = 60;
 export const dynamicParams = true; // páginas no pre-renderizadas se generan on-demand
 
 export async function generateStaticParams() {
-  try {
-    const products = await prisma.product.findMany({
-      where:  { is_published: true },
-      select: { slug: true },
-    });
-    return products.map((p) => ({ slug: p.slug }));
-  } catch {
-    // Si la DB no está disponible durante el build, no pre-renderizamos nada.
-    // Las páginas se generarán on-demand cuando se visiten.
-    return [];
-  }
+  // Retornamos vacío para evitar pre-renderizado concurrente en build.
+  // Con dynamicParams = true + revalidate = 60, las páginas se generan
+  // on-demand al primer acceso y quedan cacheadas con ISR.
+  return [];
 }
 
 export async function generateMetadata({
