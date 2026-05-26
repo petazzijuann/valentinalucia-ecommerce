@@ -95,7 +95,7 @@ export async function handleNuevo(ctx: Context) {
   await clearSession(chatId);
   await setSession(chatId, { state: "upload_waiting_photo" });
   await ctx.reply(
-    "📸 *Nuevo producto*\n\nEnviá la foto del producto.",
+    "📸 *Nuevo producto*\n\nEnviá las fotos del producto (podés mandar varias).\nCuando termines, escribí el *nombre del producto*.",
     { parse_mode: "Markdown" }
   );
 }
@@ -110,20 +110,36 @@ export async function handlePhoto(ctx: Context) {
 
   const fileId = msg.photo[msg.photo.length - 1].file_id;
 
-  // Estado: foto inicial del producto (flujo sin color o inicio)
+  // Estado: fotos iniciales del producto (acumula varias, sigue en este estado)
   if (session.state === "upload_waiting_photo") {
-    const waiting = await ctx.reply("⏳ Subiendo imagen...");
+    const waiting = await ctx.reply("⏳ Subiendo foto...");
     try {
-      const fileLink     = await ctx.telegram.getFileLink(fileId);
+      const fileLink      = await ctx.telegram.getFileLink(fileId);
       const cloudinaryUrl = await uploadToCloudinary(fileLink.toString());
 
+      const currentUrls  = session.uploadData?.photo_urls ?? [];
+      const updatedUrls  = [...currentUrls, cloudinaryUrl];
+
       await setSession(chatId, {
-        state: "upload_waiting_name",
-        uploadData: { photo_url: cloudinaryUrl },
+        ...session,
+        state: "upload_waiting_photo", // sigue esperando más fotos o el nombre
+        uploadData: {
+          ...session.uploadData,
+          photo_url:  updatedUrls[0],  // compat legacy
+          photo_urls: updatedUrls,
+        },
       });
 
       await ctx.telegram.deleteMessage(ctx.chat!.id, waiting.message_id);
-      await ctx.reply("✅ Foto subida.\n\n¿Cómo se llama el producto?");
+
+      if (updatedUrls.length === 1) {
+        await ctx.reply(
+          `📷 *Foto 1 cargada.*\nPodés enviar más fotos o escribí el *nombre del producto* para continuar.`,
+          { parse_mode: "Markdown" }
+        );
+      } else {
+        await ctx.reply(`📷 Foto ${updatedUrls.length} cargada.`);
+      }
     } catch {
       await ctx.telegram.deleteMessage(ctx.chat!.id, waiting.message_id);
       await ctx.reply("❌ Error subiendo la foto. Intentá de nuevo.");
@@ -193,6 +209,24 @@ export async function handleText(ctx: Context) {
   const text    = (ctx.message as { text?: string })?.text?.trim() ?? "";
 
   switch (session.state) {
+
+    // Nombre del producto mientras se están mandando fotos (estado inicial)
+    case "upload_waiting_photo": {
+      if (!(session.uploadData?.photo_urls?.length)) {
+        await ctx.reply("📸 Primero enviá al menos una foto del producto.");
+        break;
+      }
+      await setSession(chatId, {
+        ...session,
+        state: "upload_waiting_category",
+        uploadData: { ...session.uploadData, name: text },
+      });
+      await ctx.reply(`📌 Nombre: *${text}*\n\n¿Categoría?`, {
+        parse_mode: "Markdown",
+        reply_markup: CATEGORY_KEYBOARD,
+      });
+      break;
+    }
 
     case "upload_waiting_name": {
       await setSession(chatId, {
@@ -458,10 +492,12 @@ export async function handleCallback(ctx: Context) {
   // ── Decisión: varios colores ────────────────────────────────
   if (data === "upload:multi_color") {
     if (session.state !== "upload_waiting_color_decision") return;
-    // La foto enviada al inicio del /nuevo pasa a ser la primera foto del primer color
-    const initialPhotos = session.uploadData?.photo_url
-      ? [session.uploadData.photo_url]
-      : [];
+    // Todas las fotos iniciales pasan al primer color
+    const initialPhotos = session.uploadData?.photo_urls?.length
+      ? session.uploadData.photo_urls
+      : session.uploadData?.photo_url
+        ? [session.uploadData.photo_url]
+        : [];
     await setSession(chatId, {
       ...session,
       state: "upload_waiting_color_name",
@@ -516,8 +552,9 @@ export async function handleCallback(ctx: Context) {
     const hasColors     = colorVariants.length > 1 ||
       (colorVariants.length === 1 && colorVariants[0].name !== "Único");
 
-    // Imágenes y stock legacy = del primer color (backward compat) o del flujo sin color
-    const legacyImages = hasColors ? (colorVariants[0]?.images ?? [d.photo_url!]) : [d.photo_url!];
+    // Imágenes: del primer color (multi-color) o todas las fotos iniciales (un solo color)
+    const singleColorImages = d.photo_urls?.length ? d.photo_urls : (d.photo_url ? [d.photo_url] : []);
+    const legacyImages = hasColors ? (colorVariants[0]?.images ?? singleColorImages) : singleColorImages;
     const legacyStock  = hasColors ? (colorVariants[0]?.stock  ?? d.stock ?? {}) : (d.stock ?? {});
 
     const product = await prisma.product.create({

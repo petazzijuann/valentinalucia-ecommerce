@@ -34,7 +34,8 @@ export type BotState =
   | "addcolor_confirming";
 
 export interface UploadData {
-  photo_url?:      string;
+  photo_url?:      string;    // backward compat — primera foto (legacy)
+  photo_urls?:     string[];  // todas las fotos iniciales del producto
   name?:           string;
   category?:       string;
   stock?:          Record<string, number>;
