@@ -8,7 +8,7 @@ import type { ProductPublic, ColorVariant, StockMap } from "@/types";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL ?? "https://valentinalucia.com.ar";
 
-export const revalidate    = 3600;
+export const revalidate    = 60;
 export const dynamicParams = true; // páginas no pre-renderizadas se generan on-demand
 
 export async function generateStaticParams() {

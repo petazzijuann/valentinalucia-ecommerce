@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 
 const stockSchema = z.record(z.string(), z.number().min(0));
@@ -38,6 +39,9 @@ export async function PATCH(
     data: { is_published: body.is_published },
   });
 
+  revalidatePath(`/producto/${product.slug}`);
+  revalidatePath("/tienda");
+
   return NextResponse.json({ id: product.id, is_published: product.is_published });
 }
 
@@ -72,6 +76,9 @@ export async function PUT(
       }),
     },
   });
+
+  revalidatePath(`/producto/${updated.slug}`);
+  revalidatePath("/tienda");
 
   return NextResponse.json({ ...updated, price_sale: Number(updated.price_sale), price_cost: Number(updated.price_cost) });
 }

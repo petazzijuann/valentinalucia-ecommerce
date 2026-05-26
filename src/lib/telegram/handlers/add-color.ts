@@ -1,4 +1,5 @@
 import type { Context } from "telegraf";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 import { uploadToCloudinary } from "@/lib/cloudinary/upload";
 import { getSession, setSession, clearSession } from "../state";
@@ -158,7 +159,7 @@ export async function handleAddColorCallback(ctx: Context) {
 
     const existing = await prisma.product.findUnique({
       where:  { id: ad.product_id! },
-      select: { color_variants: true },
+      select: { color_variants: true, slug: true },
     });
     if (!existing) {
       await ctx.reply("❌ Producto no encontrado.");
@@ -178,6 +179,9 @@ export async function handleAddColorCallback(ctx: Context) {
       where: { id: ad.product_id! },
       data:  { color_variants: JSON.parse(JSON.stringify(updatedVariants)) },
     });
+
+    revalidatePath(`/producto/${existing.slug}`);
+    revalidatePath("/tienda");
 
     await clearSession(chatId);
     await ctx.reply(
