@@ -27,9 +27,9 @@ export default function ProductViewWithColors({ product }: Props) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
-      {/* Galería — cambia con el color */}
+      {/* Galería — key=selectedIdx fuerza remount al cambiar color, reseteando estado interno */}
       <div className="opacity-0 animate-[fadeSlideUp_0.8s_ease-out_0.1s_forwards]">
-        <ImageGallery images={activeImages} name={product.name} />
+        <ImageGallery key={selectedIdx} images={activeImages} name={product.name} />
       </div>
 
       {/* Info animada — pasa props de color */}
