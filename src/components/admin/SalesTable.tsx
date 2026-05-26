@@ -14,10 +14,10 @@ function MarginBadge({ sale, cost }: { sale: number; cost: number }) {
   const m = Math.round(((sale - cost) / sale) * 100);
   const cls =
     m >= 40
-      ? "bg-VALENTINA LUCIA-success/10 text-VALENTINA LUCIA-success"
+      ? "bg-green-600/10 text-green-600"
       : m >= 20
       ? "bg-yellow-500/10 text-yellow-600"
-      : "bg-VALENTINA LUCIA-error/10 text-VALENTINA LUCIA-error";
+      : "bg-red-600/10 text-red-600";
   return <span className={`label-tag text-[10px] px-2 py-0.5 ${cls}`}>{m}%</span>;
 }
 
@@ -88,7 +88,7 @@ export default function SalesTable() {
       {/* Toast */}
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 text-sm font-medium shadow-lg ${
-          toast.type === "ok" ? "bg-VALENTINA LUCIA-success text-white" : "bg-VALENTINA LUCIA-error text-white"
+          toast.type === "ok" ? "bg-green-600 text-white" : "bg-red-600 text-white"
         }`}>
           {toast.msg}
         </div>
@@ -158,7 +158,7 @@ export default function SalesTable() {
                       <button
                         onClick={() => openDelete(s)}
                         title="Eliminar venta"
-                        className="text-muted-foreground hover:text-VALENTINA LUCIA-error transition-colors"
+                        className="text-muted-foreground hover:text-red-600 transition-colors"
                       >
                         <Trash2 size={14} />
                       </button>

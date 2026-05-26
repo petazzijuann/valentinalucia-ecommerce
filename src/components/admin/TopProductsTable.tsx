@@ -6,10 +6,10 @@ type Product = DashboardMetrics["top_products"][number];
 function MarginBadge({ value }: { value: number }) {
   const cls =
     value >= 40
-      ? "bg-VALENTINA LUCIA-success/10 text-VALENTINA LUCIA-success"
+      ? "bg-green-600/10 text-green-600"
       : value >= 20
       ? "bg-yellow-500/10 text-yellow-600"
-      : "bg-VALENTINA LUCIA-error/10 text-VALENTINA LUCIA-error";
+      : "bg-red-600/10 text-red-600";
   return (
     <span className={`label-tag text-[10px] px-2 py-0.5 ${cls}`}>{value}%</span>
   );

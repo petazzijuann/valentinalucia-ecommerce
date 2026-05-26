@@ -260,7 +260,7 @@ export default function EditProductSheet({ product, open, onOpenChange, onSaved 
 
           {/* Error */}
           {error && (
-            <p className="text-sm text-VALENTINA LUCIA-error">{error}</p>
+            <p className="text-sm text-red-600">{error}</p>
           )}
         </div>
 

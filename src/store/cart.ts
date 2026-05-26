@@ -87,7 +87,7 @@ export const useCartStore = create<CartStore>()(
       },
     }),
     {
-      name: "VALENTINA LUCIA-cart",
+      name: "vl-cart",
       // shippingOption no se persiste (precio cotizado puede vencer)
       // shippingCp sí se persiste para comodidad del usuario
       partialize: (state) => ({ items: state.items, shippingCp: state.shippingCp }),

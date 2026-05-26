@@ -54,7 +54,7 @@ function FloatingField({
         />
       )}
       <label htmlFor={id} className={labelCls}>{label}</label>
-      {error && <p className="label-tag text-VALENTINA LUCIA-error text-[10px] mt-1">{error}</p>}
+      {error && <p className="label-tag text-red-600 text-[10px] mt-1">{error}</p>}
     </div>
   );
 }
@@ -113,12 +113,12 @@ export default function ContactForm() {
       <FloatingField id="mensaje" label="Mensaje *" value={form.mensaje} onChange={set("mensaje")} required isTextarea error={errors.mensaje} />
 
       {isSuccess && (
-        <p className="label-tag text-VALENTINA LUCIA-success text-xs">
+        <p className="label-tag text-green-600 text-xs">
           ✓ Recibimos tu consulta. Te respondemos en menos de 24hs.
         </p>
       )}
       {status === "error" && serverError && (
-        <p className="label-tag text-VALENTINA LUCIA-error text-xs">{serverError}</p>
+        <p className="label-tag text-red-600 text-xs">{serverError}</p>
       )}
 
       <button

@@ -144,7 +144,7 @@ export default function CarritoPage() {
                   </div>
                   <div className="flex items-center gap-4">
                     <p className="price-text">{formatARS(item.price * item.quantity)}</p>
-                    <button onClick={() => removeItem(item.product_id, item.size)} className="text-muted-foreground hover:text-VALENTINA LUCIA-error transition-colors">
+                    <button onClick={() => removeItem(item.product_id, item.size)} className="text-muted-foreground hover:text-red-600 transition-colors">
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -153,7 +153,7 @@ export default function CarritoPage() {
             </div>
           ))}
 
-          <button onClick={clearCart} className="label-tag text-muted-foreground hover:text-VALENTINA LUCIA-error transition-colors self-start text-xs">
+          <button onClick={clearCart} className="label-tag text-muted-foreground hover:text-red-600 transition-colors self-start text-xs">
             VACIAR CARRITO
           </button>
         </div>
@@ -240,7 +240,7 @@ export default function CarritoPage() {
                   )}
 
                   {quoteStatus === "error" && (
-                    <p className="text-VALENTINA LUCIA-error text-xs label-tag">{quoteError}</p>
+                    <p className="text-red-600 text-xs label-tag">{quoteError}</p>
                   )}
 
                   {quoteStatus === "done" && quoteOptions.map((opt) => {

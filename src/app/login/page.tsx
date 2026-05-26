@@ -65,7 +65,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <p className="label-tag text-VALENTINA LUCIA-error text-center">{error}</p>
+            <p className="label-tag text-red-600 text-center">{error}</p>
           )}
 
           <button

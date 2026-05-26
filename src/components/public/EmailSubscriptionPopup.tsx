@@ -91,10 +91,10 @@ export default function EmailSubscriptionPopup() {
               />
 
               {status === "duplicate" && (
-                <p className="text-VALENTINA LUCIA-error text-xs label-tag">Este email ya está suscrito.</p>
+                <p className="text-red-600 text-xs label-tag">Este email ya está suscrito.</p>
               )}
               {status === "error" && (
-                <p className="text-VALENTINA LUCIA-error text-xs label-tag">Error inesperado. Intentá de nuevo.</p>
+                <p className="text-red-600 text-xs label-tag">Error inesperado. Intentá de nuevo.</p>
               )}
 
               <button

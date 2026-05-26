@@ -58,7 +58,7 @@ function StatRow({ label, bucket }: { label: string; bucket: Bucket }) {
       <div className="flex gap-6 text-sm">
         <span className="text-muted-foreground">{bucket.units} u.</span>
         <span>{formatARS(bucket.revenue)}</span>
-        <span className="text-VALENTINA LUCIA-success">{formatARS(bucket.profit)}</span>
+        <span className="text-green-600">{formatARS(bucket.profit)}</span>
         <span className="label-tag text-[10px] text-muted-foreground">{margin}%</span>
       </div>
     </div>

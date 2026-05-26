@@ -116,7 +116,7 @@ export default function CartDrawer() {
                         </p>
                         <button
                           onClick={() => removeItem(item.product_id, item.size)}
-                          className="text-muted-foreground hover:text-VALENTINA LUCIA-error transition-colors"
+                          className="text-muted-foreground hover:text-red-600 transition-colors"
                           aria-label="Eliminar"
                         >
                           <Trash2 size={15} />

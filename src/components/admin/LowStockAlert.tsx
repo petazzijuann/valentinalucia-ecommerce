@@ -8,7 +8,7 @@ export default function LowStockAlert({ items }: { items: Item[] }) {
       <div className="flex items-center gap-2 mb-4">
         <p className="label-tag text-[10px] text-muted-foreground">STOCK BAJO</p>
         {items.length > 0 && (
-          <span className="label-tag text-[10px] bg-VALENTINA LUCIA-error text-white px-1.5 py-0.5">
+          <span className="label-tag text-[10px] bg-red-600 text-white px-1.5 py-0.5">
             {items.length}
           </span>
         )}
@@ -34,7 +34,7 @@ export default function LowStockAlert({ items }: { items: Item[] }) {
                     key={size}
                     className={`label-tag text-[10px] px-2 py-0.5 ${
                       qty <= 3
-                        ? "bg-VALENTINA LUCIA-error/10 text-VALENTINA LUCIA-error"
+                        ? "bg-red-600/10 text-red-600"
                         : "bg-muted text-muted-foreground"
                     }`}
                   >

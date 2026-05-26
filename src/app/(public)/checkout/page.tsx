@@ -252,7 +252,7 @@ export default function CheckoutPage() {
                       {quoteStatus === "loading" ? "..." : "RECOTIZAR"}
                     </button>
                   </div>
-                  {quoteError && <p className="text-VALENTINA LUCIA-error text-xs label-tag mt-2">{quoteError}</p>}
+                  {quoteError && <p className="text-red-600 text-xs label-tag mt-2">{quoteError}</p>}
                   {quoteStatus === "done" && quoteOptions.map((opt) => (
                     <button
                       key={opt.type}
@@ -296,7 +296,7 @@ export default function CheckoutPage() {
                       {quoteStatus === "loading" ? "..." : "CALCULAR"}
                     </button>
                   </div>
-                  {quoteError && <p className="text-VALENTINA LUCIA-error text-xs label-tag mt-2">{quoteError}</p>}
+                  {quoteError && <p className="text-red-600 text-xs label-tag mt-2">{quoteError}</p>}
                   {quoteStatus === "done" && quoteOptions.map((opt) => (
                     <button
                       key={opt.type}
@@ -363,7 +363,7 @@ export default function CheckoutPage() {
               </div>
 
               {error && (
-                <p className="label-tag text-VALENTINA LUCIA-error text-center mb-4 text-xs">{error}</p>
+                <p className="label-tag text-red-600 text-center mb-4 text-xs">{error}</p>
               )}
 
               <button

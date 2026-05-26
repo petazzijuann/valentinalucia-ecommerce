@@ -57,7 +57,7 @@ export default function AdminSidebar() {
       <div className="px-6 py-4 border-t border-green-mid">
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 label-tag text-[11px] text-cream-dark hover:text-VALENTINA LUCIA-error transition-colors w-full"
+          className="flex items-center gap-3 label-tag text-[11px] text-cream-dark hover:text-red-600 transition-colors w-full"
         >
           <LogOut size={15} />
           CERRAR SESIÓN

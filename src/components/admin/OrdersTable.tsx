@@ -25,8 +25,8 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json() as Promise<Admi
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
   pending_payment:   { label: "PENDIENTE",  cls: "bg-yellow-500/10 text-yellow-600" },
-  payment_confirmed: { label: "CONFIRMADO", cls: "bg-VALENTINA LUCIA-success/10 text-VALENTINA LUCIA-success" },
-  cancelled:         { label: "RECHAZADO",  cls: "bg-VALENTINA LUCIA-error/10 text-VALENTINA LUCIA-error" },
+  payment_confirmed: { label: "CONFIRMADO", cls: "bg-green-600/10 text-green-600" },
+  cancelled:         { label: "RECHAZADO",  cls: "bg-red-600/10 text-red-600" },
   shipped:           { label: "ENVIADO",    cls: "bg-brand-green/10 text-brand-green" },
   delivered:         { label: "ENTREGADO",  cls: "bg-muted text-muted-foreground" },
 };
@@ -89,7 +89,7 @@ export default function OrdersTable() {
       {/* Toast */}
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 text-sm font-medium shadow-lg ${
-          toast.type === "ok" ? "bg-VALENTINA LUCIA-success text-white" : "bg-VALENTINA LUCIA-error text-white"
+          toast.type === "ok" ? "bg-green-600 text-white" : "bg-red-600 text-white"
         }`}>
           {toast.msg}
         </div>
@@ -176,14 +176,14 @@ export default function OrdersTable() {
                         <button
                           onClick={() => handleAction(order.id, "confirm")}
                           disabled={!!acting}
-                          className="label-tag text-[11px] px-5 py-2 bg-VALENTINA LUCIA-success text-white hover:opacity-90 transition-opacity disabled:opacity-40"
+                          className="label-tag text-[11px] px-5 py-2 bg-green-600 text-white hover:opacity-90 transition-opacity disabled:opacity-40"
                         >
                           {acting === order.id + "confirm" ? "..." : "CONFIRMAR PAGO"}
                         </button>
                         <button
                           onClick={() => handleAction(order.id, "reject")}
                           disabled={!!acting}
-                          className="label-tag text-[11px] px-5 py-2 border border-VALENTINA LUCIA-error text-VALENTINA LUCIA-error hover:bg-VALENTINA LUCIA-error/10 transition-colors disabled:opacity-40"
+                          className="label-tag text-[11px] px-5 py-2 border border-red-500 text-red-600 hover:bg-red-600/10 transition-colors disabled:opacity-40"
                         >
                           {acting === order.id + "reject" ? "..." : "RECHAZAR"}
                         </button>
@@ -193,7 +193,7 @@ export default function OrdersTable() {
                       <button
                         onClick={() => openDelete(order)}
                         disabled={!!acting}
-                        className="label-tag text-[11px] px-5 py-2 border border-VALENTINA LUCIA-error/50 text-VALENTINA LUCIA-error hover:bg-VALENTINA LUCIA-error/10 transition-colors disabled:opacity-40"
+                        className="label-tag text-[11px] px-5 py-2 border border-red-500/50 text-red-600 hover:bg-red-600/10 transition-colors disabled:opacity-40"
                       >
                         ELIMINAR PEDIDO
                       </button>

@@ -14,10 +14,10 @@ const fetcher = (url: string) =>
 function MarginBadge({ value }: { value: number }) {
   const cls =
     value >= 40
-      ? "bg-VALENTINA LUCIA-success/10 text-VALENTINA LUCIA-success"
+      ? "bg-green-600/10 text-green-600"
       : value >= 20
       ? "bg-yellow-500/10 text-yellow-600"
-      : "bg-VALENTINA LUCIA-error/10 text-VALENTINA LUCIA-error";
+      : "bg-red-600/10 text-red-600";
   return (
     <span className={`label-tag text-[10px] px-2 py-0.5 ${cls}`}>{value}%</span>
   );
@@ -93,8 +93,8 @@ export default function ProductsTable() {
         <div
           className={`fixed bottom-6 right-6 z-50 px-5 py-3 text-sm font-medium shadow-lg ${
             toast.type === "ok"
-              ? "bg-VALENTINA LUCIA-success text-white"
-              : "bg-VALENTINA LUCIA-error text-white"
+              ? "bg-green-600 text-white"
+              : "bg-red-600 text-white"
           }`}
         >
           {toast.msg}
@@ -152,7 +152,7 @@ export default function ProductsTable() {
                       <td className="px-4 py-3">
                         <span className={`label-tag text-[10px] px-2 py-0.5 ${
                           p.is_published
-                            ? "bg-VALENTINA LUCIA-success/10 text-VALENTINA LUCIA-success"
+                            ? "bg-green-600/10 text-green-600"
                             : "bg-muted text-muted-foreground"
                         }`}>
                           {p.is_published ? "PUBLICADO" : "BORRADOR"}
@@ -173,8 +173,8 @@ export default function ProductsTable() {
                             disabled={toggling === p.id}
                             className={`label-tag text-[10px] px-3 py-1 border transition-colors disabled:opacity-50 ${
                               p.is_published
-                                ? "border-VALENTINA LUCIA-error text-VALENTINA LUCIA-error hover:bg-VALENTINA LUCIA-error/10"
-                                : "border-VALENTINA LUCIA-success text-VALENTINA LUCIA-success hover:bg-VALENTINA LUCIA-success/10"
+                                ? "border-red-500 text-red-600 hover:bg-red-600/10"
+                                : "border-green-600 text-green-600 hover:bg-green-600/10"
                             }`}
                           >
                             {toggling === p.id ? "..." : p.is_published ? "DESPUBLICAR" : "PUBLICAR"}
@@ -182,7 +182,7 @@ export default function ProductsTable() {
                           {/* ELIMINAR */}
                           <button
                             onClick={() => openDelete(p)}
-                            className="label-tag text-[10px] px-3 py-1 border border-VALENTINA LUCIA-error text-VALENTINA LUCIA-error hover:bg-VALENTINA LUCIA-error/10 transition-colors flex items-center gap-1"
+                            className="label-tag text-[10px] px-3 py-1 border border-red-500 text-red-600 hover:bg-red-600/10 transition-colors flex items-center gap-1"
                           >
                             <Trash2 size={11} /> ELIMINAR
                           </button>

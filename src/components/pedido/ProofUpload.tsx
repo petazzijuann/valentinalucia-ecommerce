@@ -63,7 +63,7 @@ export default function ProofUpload({ orderId }: { orderId: string }) {
       </div>
 
       {errorMsg && (
-        <p className="label-tag text-VALENTINA LUCIA-error text-[10px]">{errorMsg}</p>
+        <p className="label-tag text-red-600 text-[10px]">{errorMsg}</p>
       )}
 
       <button

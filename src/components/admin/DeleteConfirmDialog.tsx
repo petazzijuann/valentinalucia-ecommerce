@@ -55,7 +55,7 @@ export default function DeleteConfirmDialog({
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="label-tag text-[11px] px-5 py-2 bg-VALENTINA LUCIA-error text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="label-tag text-[11px] px-5 py-2 bg-red-600 text-white hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {loading ? "ELIMINANDO..." : "ELIMINAR"}
           </button>
