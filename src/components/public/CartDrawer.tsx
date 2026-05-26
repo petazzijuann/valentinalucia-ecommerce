@@ -82,7 +82,7 @@ export default function CartDrawer() {
                     <div>
                       <p className="font-medium text-sm leading-tight">{item.name}</p>
                       <p className="label-tag text-muted-foreground mt-1">
-                        Talle {item.size}
+                        {item.size === "ÚNICO" ? "Talle único" : `Talle ${item.size}`}
                         {item.color && item.color !== "Único" && (
                           <> · Color: {item.color.toUpperCase()}</>
                         )}

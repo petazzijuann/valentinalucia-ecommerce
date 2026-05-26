@@ -135,7 +135,7 @@ export default function CarritoPage() {
                 <div>
                   <h3 className="font-bebas text-xl">{item.name}</h3>
                   <p className="label-tag text-muted-foreground mt-1">
-                    Talle {item.size}
+                    {item.size === "ÚNICO" ? "Talle único" : `Talle ${item.size}`}
                     {item.color && item.color !== "Único" && (
                       <> · Color: {item.color.toUpperCase()}</>
                     )}
@@ -173,7 +173,7 @@ export default function CarritoPage() {
               {items.map((item) => (
                 <div key={`${item.product_id}-${item.size}-${item.color ?? ""}`} className="flex justify-between text-muted-foreground">
                   <span>
-                    {item.name} ({item.size}
+                    {item.name} ({item.size === "ÚNICO" ? "único" : item.size}
                     {item.color && item.color !== "Único" ? ` · ${item.color.toUpperCase()}` : ""})
                     ×{item.quantity}
                   </span>

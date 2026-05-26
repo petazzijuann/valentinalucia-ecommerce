@@ -6,7 +6,13 @@ import { gsap } from "@/lib/gsap";
 import { useCartStore } from "@/store/cart";
 import type { ProductPublic, ColorVariant, StockMap } from "@/types";
 
-const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL"];
+// Orden de talles por categoría
+const SIZE_ORDER_DEFAULT = ["ÚNICO", "XS", "S", "M", "L", "XL", "XXL"];
+const PANTALON_SIZES     = ["ÚNICO", "36", "38", "40", "42", "44", "46"];
+
+function getSizeOrder(category: string): string[] {
+  return category === "pantalones" ? PANTALON_SIZES : SIZE_ORDER_DEFAULT;
+}
 
 type BtnStatus = "idle" | "loading" | "done";
 
@@ -25,21 +31,28 @@ export default function AddToCartSection({
   onColorChange,
   activeStock,
 }: Props) {
-  // Si hay variantes de color usar el stock del color activo, sino el del producto
   const stock: StockMap = activeStock ?? (product.stock as StockMap);
-  const allSizes        = SIZE_ORDER.filter((s) => s in stock);
-  const firstAvail      = allSizes.find((s) => (stock[s] ?? 0) > 0) ?? null;
+
+  // Si hay talle ÚNICO con stock > 0, el producto es talle único
+  const isUnico  = (stock["ÚNICO"] ?? 0) > 0;
+  const sizeOrder = getSizeOrder(product.category);
+  const allSizes  = isUnico
+    ? ["ÚNICO"]
+    : sizeOrder.filter((s) => s in stock && s !== "ÚNICO");
+
+  const firstAvail = allSizes.find((s) => (stock[s] ?? 0) > 0) ?? null;
 
   const [selectedSize, setSelectedSize] = useState<string | null>(
+    // Auto-seleccionar si hay un solo talle disponible (incluyendo ÚNICO)
     allSizes.filter((s) => (stock[s] ?? 0) > 0).length === 1 ? firstAvail : null
   );
-  const [quantity, setQuantity]     = useState(1);
-  const [btnStatus, setBtnStatus]   = useState<BtnStatus>("idle");
-  const { addItem, openCart }       = useCartStore();
+  const [quantity, setQuantity]   = useState(1);
+  const [btnStatus, setBtnStatus] = useState<BtnStatus>("idle");
+  const { addItem, openCart }     = useCartStore();
 
   const noStock = allSizes.every((s) => (stock[s] ?? 0) === 0);
 
-  // Cuando cambia el color (desde afuera), resetear talle seleccionado
+  // Resetear talle al cambiar de color
   const [prevIdx, setPrevIdx] = useState(selectedColorIdx);
   if (prevIdx !== selectedColorIdx) {
     setPrevIdx(selectedColorIdx);
@@ -47,9 +60,8 @@ export default function AddToCartSection({
     setQuantity(1);
   }
 
-  // Determinar si mostramos el selector de color (>1 color Y el único no es solo "Único")
-  const showColorSelector =
-    colorVariants.length > 1 ||
+  // Selector de color — solo si hay más de 1 variante de color real
+  const showColorSelector = colorVariants.length > 1 ||
     (colorVariants.length === 1 && colorVariants[0].name !== "Único");
 
   function handleSizeSelect(size: string) {
@@ -100,7 +112,7 @@ export default function AddToCartSection({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Selector de color — solo si hay más de 1 color */}
+      {/* Selector de color */}
       {showColorSelector && colorVariants.length > 1 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
@@ -128,46 +140,51 @@ export default function AddToCartSection({
         </div>
       )}
 
-      {/* Selector de talle */}
-      <div>
-        <div className="flex items-center mb-3">
-          <p className="label-tag">TALLE</p>
+      {/* Selector de talle — se oculta si es talle ÚNICO (auto-seleccionado) */}
+      {isUnico ? (
+        <div>
+          <p className="label-tag text-muted-foreground">TALLE ÚNICO</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {allSizes.map((size) => {
-            const qty       = stock[size] ?? 0;
-            const available = qty > 0;
-            const active    = selectedSize === size;
-            return (
-              <button
-                key={size}
-                id={`size-btn-${product.id}-${size}`}
-                onClick={() => handleSizeSelect(size)}
-                disabled={!available}
-                className={`relative w-12 h-12 border label-tag text-sm transition-colors overflow-hidden ${
-                  active
-                    ? "bg-brand-green text-brand-cream border-brand-green"
-                    : available
-                    ? "border-border hover:border-brand-green hover:bg-brand-green/5"
-                    : "border-border text-muted-foreground cursor-not-allowed"
-                }`}
-              >
-                {size}
-                {/* diagonal line for out-of-stock */}
-                {!available && (
-                  <span
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background:
-                        "linear-gradient(to top right, transparent calc(50% - 1px), #d4d4cc calc(50% - 1px), #d4d4cc calc(50% + 1px), transparent calc(50% + 1px))",
-                    }}
-                  />
-                )}
-              </button>
-            );
-          })}
+      ) : (
+        <div>
+          <div className="flex items-center mb-3">
+            <p className="label-tag">TALLE</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {allSizes.map((size) => {
+              const qty       = stock[size] ?? 0;
+              const available = qty > 0;
+              const active    = selectedSize === size;
+              return (
+                <button
+                  key={size}
+                  id={`size-btn-${product.id}-${size}`}
+                  onClick={() => handleSizeSelect(size)}
+                  disabled={!available}
+                  className={`relative w-12 h-12 border label-tag text-sm transition-colors overflow-hidden ${
+                    active
+                      ? "bg-brand-green text-brand-cream border-brand-green"
+                      : available
+                      ? "border-border hover:border-brand-green hover:bg-brand-green/5"
+                      : "border-border text-muted-foreground cursor-not-allowed"
+                  }`}
+                >
+                  {size}
+                  {!available && (
+                    <span
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        background:
+                          "linear-gradient(to top right, transparent calc(50% - 1px), #d4d4cc calc(50% - 1px), #d4d4cc calc(50% + 1px), transparent calc(50% + 1px))",
+                      }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Selector de cantidad */}
       {selectedSize && (
@@ -208,11 +225,9 @@ export default function AddToCartSection({
             : "bg-brand-green text-brand-cream"
         }`}
       >
-        {/* hover fill — solo cuando idle y habilitado */}
         {isIdle && selectedSize && (
           <span className="absolute inset-0 bg-brand-cream -translate-x-full group-hover:translate-x-0 transition-transform duration-100 ease-in-out" aria-hidden />
         )}
-
         <span className={`relative z-10 flex items-center gap-3 transition-colors duration-100 ${isIdle && selectedSize ? "group-hover:text-brand-green" : ""}`}>
           {btnStatus === "done" ? (
             <><Check size={18} />✓ AGREGADO</>

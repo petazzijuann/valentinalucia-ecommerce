@@ -105,7 +105,9 @@ export default async function PedidoPage({
           {items.map((item, i) => (
             <li key={i} className="flex justify-between text-sm">
               <span className="text-muted-foreground">
-                {item.name} ({item.size}) ×{item.qty}
+                {item.name} ({item.size === "ÚNICO" ? "único" : item.size}
+                {item.color && item.color !== "Único" ? ` · ${item.color.toUpperCase()}` : ""})
+                ×{item.qty}
               </span>
               <span>{formatARS(item.price * item.qty)}</span>
             </li>

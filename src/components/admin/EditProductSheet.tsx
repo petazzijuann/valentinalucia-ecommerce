@@ -4,8 +4,15 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import type { ProductAdmin, StockMap, ColorVariant } from "@/types";
 
-const SIZES      = ["XS", "S", "M", "L", "XL", "XXL"] as const;
-const CATEGORIES = ["remeras", "pantalones", "buzos", "accesorios", "calzado"] as const;
+const SIZES_DEFAULT  = ["XS", "S", "M", "L", "XL", "XXL"] as const;
+const SIZES_PANTALON = ["36", "38", "40", "42", "44", "46"] as const;
+const CATEGORIES     = ["remeras", "pantalones", "buzos", "accesorios", "calzado"] as const;
+
+function getFormSizes(category: string): string[] {
+  return category === "pantalones"
+    ? [...SIZES_PANTALON, "ÚNICO"]
+    : [...SIZES_DEFAULT, "ÚNICO"];
+}
 
 interface Props {
   product: ProductAdmin | null;
@@ -37,6 +44,7 @@ interface FormState {
 function toForm(p: ProductAdmin): FormState {
   const stock         = p.stock as StockMap;
   const colorVariants = (p.color_variants ?? []) as ColorVariant[];
+  const sizes         = getFormSizes(p.category);
 
   return {
     name:           p.name,
@@ -44,13 +52,13 @@ function toForm(p: ProductAdmin): FormState {
     category:       p.category,
     price_sale:     String(p.price_sale),
     price_cost:     String(p.price_cost),
-    stock:          Object.fromEntries(SIZES.map((s) => [s, String(stock[s] ?? 0)])),
+    stock:          Object.fromEntries(sizes.map((s) => [s, String(stock[s] ?? 0)])),
     tags:           p.tags.join(", "),
     is_published:   p.is_published,
     color_variants: colorVariants.map((cv): FormColorVariant => ({
       name:   cv.name,
       images: cv.images,
-      stock:  Object.fromEntries(SIZES.map((s) => [s, String(cv.stock[s] ?? 0)])),
+      stock:  Object.fromEntries(sizes.map((s) => [s, String(cv.stock[s] ?? 0)])),
     })),
   };
 }
@@ -89,22 +97,20 @@ export default function EditProductSheet({ product, open, onOpenChange, onSaved 
     if (isNaN(price_sale) || price_sale <= 0) { setError("Precio de venta inválido."); return; }
     if (isNaN(price_cost) || price_cost <= 0) { setError("Precio de costo inválido."); return; }
 
+    const sizes = getFormSizes(form.category);
     const stock = Object.fromEntries(
-      SIZES.map((s) => [s, Math.max(0, parseInt(form.stock[s] ?? "0", 10) || 0)])
+      sizes.map((s) => [s, Math.max(0, parseInt(form.stock[s] ?? "0", 10) || 0)])
     );
     const tags = form.tags.split(",").map((t) => t.trim()).filter(Boolean);
 
     const hasMultipleColors = form.color_variants.length > 1 ||
       (form.color_variants.length === 1 && form.color_variants[0].name !== "Único");
 
-    // Convertir stock de color_variants a números
+    // Convertir stock de color_variants a números (talles correctos por categoría)
     const color_variants = form.color_variants.map((cv) => ({
       ...cv,
       stock: Object.fromEntries(
-        Object.entries(cv.stock).map(([size, qty]) => [
-          size,
-          typeof qty === "string" ? Math.max(0, parseInt(qty, 10) || 0) : qty,
-        ])
+        sizes.map((s) => [s, Math.max(0, parseInt(String(cv.stock[s] ?? "0"), 10) || 0)])
       ),
     }));
 
@@ -248,7 +254,7 @@ export default function EditProductSheet({ product, open, onOpenChange, onSaved 
             <div>
               <label className="label-tag text-[10px] text-muted-foreground block mb-2">STOCK POR TALLE</label>
               <div className="grid grid-cols-3 gap-2">
-                {SIZES.map((size) => (
+                {getFormSizes(form.category).map((size) => (
                   <div key={size}>
                     <label className="label-tag text-[9px] text-muted-foreground block mb-1">{size}</label>
                     <input
@@ -290,7 +296,7 @@ export default function EditProductSheet({ product, open, onOpenChange, onSaved 
               {/* Stock del color activo */}
               {form.color_variants[activeColorTab] && (
                 <div className="grid grid-cols-3 gap-2">
-                  {SIZES.map((size) => {
+                  {getFormSizes(form.category).map((size) => {
                     const cv = form.color_variants[activeColorTab];
                     return (
                       <div key={size}>

@@ -341,7 +341,7 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <li key={`${item.product_id}-${item.size}-${item.color ?? ""}`} className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      {item.name} ({item.size}
+                      {item.name} ({item.size === "ÚNICO" ? "único" : item.size}
                       {item.color && item.color !== "Único" ? ` · ${item.color.toUpperCase()}` : ""})
                       ×{item.quantity}
                     </span>

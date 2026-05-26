@@ -52,18 +52,35 @@ function colorEmoji(name: string): string {
 
 export function parseStock(text: string): Record<string, number> | null {
   const stock: Record<string, number> = {};
-  const pairs = text.toUpperCase().match(/([A-Z]+)\s*[:\s]\s*(\d+)/g);
+
+  // Normalizar: quitar tildes (Ú→U), pasar a mayúsculas, luego capturar pares TALLE:CANTIDAD
+  // Acepta talles con letras (S, M, XL), numéricos (36, 38) y ÚNICO / U
+  const normalized = text
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, ""); // elimina diacríticos (Ú→U, É→E, etc.)
+
+  // Regex ampliado: acepta letras, letras+números y números puros (ej: 36, 38)
+  const pairs = normalized.match(/([A-Z][A-Z0-9]*|[0-9]+)\s*[:]\s*(\d+)/g);
   if (!pairs || pairs.length === 0) return null;
 
   for (const pair of pairs) {
-    const parts = pair.split(/[:\s]+/).filter(Boolean);
-    if (parts.length === 2) {
-      const qty = parseInt(parts[1]);
-      if (!isNaN(qty) && qty >= 0) stock[parts[0]] = qty;
-    }
+    const [rawSize, rawQty] = pair.split(":").map((s) => s.trim());
+    const qty = parseInt(rawQty);
+    // Normalizar alias de talle único
+    const size = (rawSize === "U" || rawSize === "UNICO") ? "ÚNICO" : rawSize;
+    if (!isNaN(qty) && qty >= 0) stock[size] = qty;
   }
 
   return Object.keys(stock).length > 0 ? stock : null;
+}
+
+// Prompt de stock según categoría
+function stockHelpText(category?: string): string {
+  if (category === "pantalones") {
+    return "📦 Stock por talle (numérico):\n`36:2 38:3 40:5 42:2 44:1 46:0`\nPara talle único: `U:5`";
+  }
+  return "📦 Stock por talle:\n`S:2 M:3 L:5 XL:2`\nPara talle único: `U:5`";
 }
 
 function stockSummary(stock: Record<string, number>): string {
@@ -233,7 +250,8 @@ export async function handleText(ctx: Context) {
         state: "upload_waiting_color_stock",
       });
       await ctx.reply(
-        `✅ ${photos.length} foto${photos.length === 1 ? "" : "s"} para *${session.uploadData?.current_color?.toUpperCase()}* guardada${photos.length === 1 ? "" : "s"}.\n\n📦 Stock para este color:\n_Ej: S:2 M:3 L:5_`,
+        `✅ ${photos.length} foto${photos.length === 1 ? "" : "s"} para *${session.uploadData?.current_color?.toUpperCase()}* guardada${photos.length === 1 ? "" : "s"}.\n\n` +
+        stockHelpText(session.uploadData?.category),
         { parse_mode: "Markdown" }
       );
       break;
@@ -243,7 +261,10 @@ export async function handleText(ctx: Context) {
     case "upload_waiting_color_stock": {
       const stock = parseStock(text);
       if (!stock) {
-        await ctx.reply("❌ Formato incorrecto. Usá:\n`S:2 M:3 L:5`", { parse_mode: "Markdown" });
+        await ctx.reply(
+          `❌ Formato incorrecto.\n${stockHelpText(session.uploadData?.category)}`,
+          { parse_mode: "Markdown" }
+        );
         break;
       }
 
@@ -278,7 +299,10 @@ export async function handleText(ctx: Context) {
     case "upload_waiting_stock": {
       const stock = parseStock(text);
       if (!stock) {
-        await ctx.reply("❌ Formato incorrecto. Usá:\n`S:2 M:3 L:5 XL:2`", { parse_mode: "Markdown" });
+        await ctx.reply(
+          `❌ Formato incorrecto.\n${stockHelpText(session.uploadData?.category)}`,
+          { parse_mode: "Markdown" }
+        );
         break;
       }
       await setSession(chatId, {
@@ -425,7 +449,7 @@ export async function handleCallback(ctx: Context) {
       uploadData: { ...session.uploadData, has_colors: false },
     });
     await ctx.reply(
-      "📦 ¿Stock por talle?\nEjemplo: `S:2 M:3 L:5 XL:2`",
+      stockHelpText(session.uploadData?.category),
       { parse_mode: "Markdown" }
     );
     return;
