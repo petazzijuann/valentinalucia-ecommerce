@@ -31,7 +31,12 @@ export type BotState =
   | "addcolor_waiting_name"
   | "addcolor_waiting_photos"
   | "addcolor_waiting_stock"
-  | "addcolor_confirming";
+  | "addcolor_confirming"
+  // /addphotos
+  | "addphotos_waiting_search"
+  | "addphotos_waiting_color"
+  | "addphotos_waiting_photos"
+  | "addphotos_confirming";
 
 export interface UploadData {
   photo_url?:      string;    // backward compat — primera foto (legacy)
@@ -69,11 +74,23 @@ export interface AddColorData {
   stock?:        Record<string, number>;
 }
 
+export interface AddPhotosData {
+  product_id?:       string;
+  product_name?:     string;
+  product_slug?:     string;
+  /** índice del color variant (-1 = producto sin color variants, usa product.images) */
+  color_index?:      number;
+  color_name?:       string;
+  /** fotos nuevas a agregar */
+  photos?:           string[];
+}
+
 export interface BotSessionData {
-  state:          BotState;
-  uploadData?:    UploadData;
-  saleData?:      SaleData;
-  addColorData?:  AddColorData;
+  state:           BotState;
+  uploadData?:     UploadData;
+  saleData?:       SaleData;
+  addColorData?:   AddColorData;
+  addPhotosData?:  AddPhotosData;
 }
 
 export async function getSession(chatId: string): Promise<BotSessionData> {
