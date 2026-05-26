@@ -12,7 +12,12 @@ export default async function PedidoPage({
 }) {
   const { id } = await params;
 
-  const order = await prisma.order.findUnique({ where: { id } });
+  let order;
+  try {
+    order = await prisma.order.findUnique({ where: { id } });
+  } catch {
+    notFound();
+  }
   if (!order) notFound();
 
   const items = order.items as unknown as OrderItem[];
@@ -25,7 +30,7 @@ export default async function PedidoPage({
       {/* Estado */}
       <div className="text-center mb-12">
         {isPaid ? (
-          <CheckCircle size={48} className="text-VALENTINA LUCIA-success mx-auto mb-4" strokeWidth={1.5} />
+          <CheckCircle size={48} className="text-green-600 mx-auto mb-4" strokeWidth={1.5} />
         ) : (
           <Clock size={48} className="text-cream-dark mx-auto mb-4" strokeWidth={1.5} />
         )}

@@ -41,23 +41,27 @@ async function getProducts(category?: string, size?: string, query?: string): Pr
     ];
   }
 
-  const products = await prisma.product.findMany({
-    where,
-    select: {
-      id: true, name: true, slug: true, description: true,
-      category: true, images: true, tags: true,
-      price_sale: true, stock: true, is_published: true,
-      created_at: true, updated_at: true,
-    },
-    orderBy: { created_at: "desc" },
-  });
+  try {
+    const products = await prisma.product.findMany({
+      where,
+      select: {
+        id: true, name: true, slug: true, description: true,
+        category: true, images: true, tags: true,
+        price_sale: true, stock: true, is_published: true,
+        created_at: true, updated_at: true,
+      },
+      orderBy: { created_at: "desc" },
+    });
 
-  return products.map((p) => ({
-    ...p,
-    price_sale: Number(p.price_sale),
-    created_at: p.created_at.toISOString(),
-    updated_at: p.updated_at.toISOString(),
-  })) as ProductPublic[];
+    return products.map((p) => ({
+      ...p,
+      price_sale: Number(p.price_sale),
+      created_at: p.created_at.toISOString(),
+      updated_at: p.updated_at.toISOString(),
+    })) as ProductPublic[];
+  } catch {
+    return [];
+  }
 }
 
 export default async function TiendaPage({
