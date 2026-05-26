@@ -11,10 +11,25 @@ import { handleMetricas, handleStock } from "./handlers/metrics";
 
 const globalForBot = globalThis as unknown as { telegramBot: Telegraf };
 
-export const bot =
-  globalForBot.telegramBot ?? new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
+function createBot(): Telegraf {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) throw new Error("TELEGRAM_BOT_TOKEN no configurado");
+  return new Telegraf(token);
+}
 
-if (process.env.NODE_ENV !== "production") globalForBot.telegramBot = bot;
+export function getBot(): Telegraf {
+  if (!globalForBot.telegramBot) {
+    globalForBot.telegramBot = createBot();
+  }
+  return globalForBot.telegramBot;
+}
+
+// Exportamos bot como getter lazy para no crashear al importar el módulo
+export const bot = new Proxy({} as Telegraf, {
+  get(_target, prop) {
+    return (getBot() as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});
 
 // Auth guard — rejects any sender that isn't the owner
 bot.use(async (ctx, next) => {
