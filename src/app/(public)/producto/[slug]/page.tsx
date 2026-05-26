@@ -9,14 +9,21 @@ import type { ProductPublic, StockMap } from "@/types";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL ?? "https://valentinalucia.com.ar";
 
-export const revalidate = 3600;
+export const revalidate    = 3600;
+export const dynamicParams = true; // páginas no pre-renderizadas se generan on-demand
 
 export async function generateStaticParams() {
-  const products = await prisma.product.findMany({
-    where:  { is_published: true },
-    select: { slug: true },
-  });
-  return products.map((p) => ({ slug: p.slug }));
+  try {
+    const products = await prisma.product.findMany({
+      where:  { is_published: true },
+      select: { slug: true },
+    });
+    return products.map((p) => ({ slug: p.slug }));
+  } catch {
+    // Si la DB no está disponible durante el build, no pre-renderizamos nada.
+    // Las páginas se generarán on-demand cuando se visiten.
+    return [];
+  }
 }
 
 export async function generateMetadata({
