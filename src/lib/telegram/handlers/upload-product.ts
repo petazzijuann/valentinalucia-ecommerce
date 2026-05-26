@@ -187,22 +187,33 @@ export async function handleText(ctx: Context) {
       break;
     }
 
-    // ── Nombre del primer color ─────────────────────────────
+    // ── Nombre del color ────────────────────────────────────
     case "upload_waiting_color_name": {
-      const colorName = text.toLowerCase().trim();
+      const colorName     = text.toLowerCase().trim();
+      // Mantener current_photos existentes (para primer color con foto inicial pre-cargada)
+      const existingPhotos = session.uploadData?.current_photos ?? [];
       await setSession(chatId, {
         ...session,
         state: "upload_waiting_color_photos",
         uploadData: {
           ...session.uploadData,
-          current_color:  colorName,
-          current_photos: [],
+          current_color: colorName,
+          // NO resetear current_photos: el primer color ya puede tener la foto inicial
         },
       });
-      await ctx.reply(
-        `🎨 Color: *${colorName.toUpperCase()}*\n\nEnviá las fotos para este color. Cuando termines escribí *LISTO*.`,
-        { parse_mode: "Markdown" }
-      );
+      if (existingPhotos.length > 0) {
+        await ctx.reply(
+          `🎨 Color: *${colorName.toUpperCase()}*\n\n` +
+          `Ya tengo ${existingPhotos.length} foto${existingPhotos.length === 1 ? "" : "s"} cargada${existingPhotos.length === 1 ? "" : "s"} para este color. ` +
+          `Podés enviar más o escribir *LISTO* para continuar.`,
+          { parse_mode: "Markdown" }
+        );
+      } else {
+        await ctx.reply(
+          `🎨 Color: *${colorName.toUpperCase()}*\n\nEnviá las fotos para este color. Cuando termines escribí *LISTO*.`,
+          { parse_mode: "Markdown" }
+        );
+      }
       break;
     }
 
@@ -423,6 +434,10 @@ export async function handleCallback(ctx: Context) {
   // ── Decisión: varios colores ────────────────────────────────
   if (data === "upload:multi_color") {
     if (session.state !== "upload_waiting_color_decision") return;
+    // La foto enviada al inicio del /nuevo pasa a ser la primera foto del primer color
+    const initialPhotos = session.uploadData?.photo_url
+      ? [session.uploadData.photo_url]
+      : [];
     await setSession(chatId, {
       ...session,
       state: "upload_waiting_color_name",
@@ -430,7 +445,7 @@ export async function handleCallback(ctx: Context) {
         ...session.uploadData,
         has_colors:     true,
         color_variants: [],
-        current_photos: [],
+        current_photos: initialPhotos,
       },
     });
     await ctx.reply("🎨 ¿Cómo se llama el primer color? (ej: negro, rojo, verde)");
