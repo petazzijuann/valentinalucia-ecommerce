@@ -36,9 +36,16 @@ export default function AddToCartSection({
   // Si hay talle ÚNICO con stock > 0, el producto es talle único
   const isUnico   = (stock["ÚNICO"] ?? 0) > 0;
   const sizeOrder = getSizeOrder(product.category);
-  const allSizes  = isUnico
+
+  // Mostrar TODOS los talles presentes en el stock (sin importar si son letras o números).
+  // El orden predefinido se usa para ordenarlos; los que no están en el orden van al final.
+  const stockKeys    = Object.keys(stock).filter((s) => s !== "ÚNICO");
+  const allSizes     = isUnico
     ? ["ÚNICO"]
-    : sizeOrder.filter((s) => s in stock && s !== "ÚNICO");
+    : [
+        ...sizeOrder.filter((s) => stockKeys.includes(s)),
+        ...stockKeys.filter((s) => !sizeOrder.includes(s)).sort(),
+      ];
 
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity]   = useState(1);

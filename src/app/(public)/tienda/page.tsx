@@ -3,8 +3,17 @@ import { prisma } from "@/lib/prisma/client";
 import TiendaHeader from "@/components/public/TiendaHeader";
 import FiltrosBarra from "@/components/public/FiltrosBarra";
 import TiendaProductGrid from "@/components/public/TiendaProductGrid";
-import type { ProductPublic } from "@/types";
+import type { ProductPublic, ColorVariant, StockMap } from "@/types";
 import type { Prisma } from "../../../generated/prisma/client";
+
+/** Devuelve true si el producto tiene al menos 1 unidad en stock (en cualquier talle/color). */
+function hasAnyStock(p: { stock: Prisma.JsonValue; color_variants: Prisma.JsonValue }): boolean {
+  const cvs = (p.color_variants as ColorVariant[] | null) ?? [];
+  if (cvs.length > 0) {
+    return cvs.some((cv) => Object.values(cv.stock).some((q) => (q as number) > 0));
+  }
+  return Object.values(p.stock as StockMap).some((q) => q > 0);
+}
 
 const CATEGORY_LABELS: Record<string, string> = {
   remeras:    "Remeras",
@@ -47,18 +56,21 @@ async function getProducts(category?: string, size?: string, query?: string): Pr
       select: {
         id: true, name: true, slug: true, description: true,
         category: true, images: true, tags: true,
-        price_sale: true, stock: true, is_published: true,
-        created_at: true, updated_at: true,
+        price_sale: true, stock: true, color_variants: true,
+        is_published: true, created_at: true, updated_at: true,
       },
       orderBy: { created_at: "desc" },
     });
 
-    return products.map((p) => ({
-      ...p,
-      price_sale: Number(p.price_sale),
-      created_at: p.created_at.toISOString(),
-      updated_at: p.updated_at.toISOString(),
-    })) as ProductPublic[];
+    return products
+      .filter(hasAnyStock)          // excluir productos sin stock
+      .map((p) => ({
+        ...p,
+        price_sale:     Number(p.price_sale),
+        created_at:     p.created_at.toISOString(),
+        updated_at:     p.updated_at.toISOString(),
+        color_variants: (p.color_variants as ColorVariant[] | null) ?? [],
+      })) as ProductPublic[];
   } catch {
     return [];
   }
