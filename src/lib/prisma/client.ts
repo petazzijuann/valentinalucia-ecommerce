@@ -4,13 +4,13 @@ import { PrismaPg } from "@prisma/adapter-pg";
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 function createPrismaClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
-
-  // Si no hay DATABASE_URL (ej: durante build o env vars faltantes),
-  // creamos el cliente sin adapter — fallará en las queries pero no al importar.
-  if (!connectionString) {
-    return new PrismaClient();
-  }
+  // Fallback placeholder so PrismaPg/PrismaClient can be instantiated at module
+  // level even when DATABASE_URL is absent (e.g. during Vercel build).
+  // Actual queries will fail at runtime if the URL is wrong, which is caught by
+  // try/catch in each page/API route.
+  const connectionString =
+    process.env.DATABASE_URL ??
+    "postgresql://placeholder:placeholder@localhost:5432/placeholder";
 
   const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({ adapter });
