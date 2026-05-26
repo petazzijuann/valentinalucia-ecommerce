@@ -5,9 +5,23 @@ import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { formatARS } from "@/lib/utils";
 import AddToCartSection from "./AddToCartSection";
-import type { ProductPublic } from "@/types";
+import type { ProductPublic, ColorVariant, StockMap } from "@/types";
 
-export default function ProductInfoAnimated({ product }: { product: ProductPublic }) {
+interface Props {
+  product:          ProductPublic;
+  colorVariants?:   ColorVariant[];
+  selectedColorIdx?: number;
+  onColorChange?:   (idx: number) => void;
+  activeStock?:     StockMap;
+}
+
+export default function ProductInfoAnimated({
+  product,
+  colorVariants,
+  selectedColorIdx,
+  onColorChange,
+  activeStock,
+}: Props) {
   const containerRef              = useRef<HTMLDivElement>(null);
   const [displayPrice, setDisplayPrice] = useState(0);
 
@@ -84,7 +98,13 @@ export default function ProductInfoAnimated({ product }: { product: ProductPubli
       </div>
 
       <div className="info-cart">
-        <AddToCartSection product={product} />
+        <AddToCartSection
+          product={product}
+          colorVariants={colorVariants}
+          selectedColorIdx={selectedColorIdx}
+          onColorChange={onColorChange}
+          activeStock={activeStock}
+        />
       </div>
 
       {product.description && (

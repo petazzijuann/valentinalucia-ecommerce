@@ -4,25 +4,53 @@ import { useState } from "react";
 import { ShoppingBag, Check } from "lucide-react";
 import { gsap } from "@/lib/gsap";
 import { useCartStore } from "@/store/cart";
-import type { ProductPublic, StockMap } from "@/types";
+import type { ProductPublic, ColorVariant, StockMap } from "@/types";
 
 const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL"];
 
 type BtnStatus = "idle" | "loading" | "done";
 
-export default function AddToCartSection({ product }: { product: ProductPublic }) {
-  const stock      = product.stock as StockMap;
-  const allSizes   = SIZE_ORDER.filter((s) => s in stock);
-  const firstAvail = allSizes.find((s) => (stock[s] ?? 0) > 0) ?? null;
+interface Props {
+  product:           ProductPublic;
+  colorVariants?:    ColorVariant[];
+  selectedColorIdx?: number;
+  onColorChange?:    (idx: number) => void;
+  activeStock?:      StockMap;
+}
+
+export default function AddToCartSection({
+  product,
+  colorVariants = [],
+  selectedColorIdx = 0,
+  onColorChange,
+  activeStock,
+}: Props) {
+  // Si hay variantes de color usar el stock del color activo, sino el del producto
+  const stock: StockMap = activeStock ?? (product.stock as StockMap);
+  const allSizes        = SIZE_ORDER.filter((s) => s in stock);
+  const firstAvail      = allSizes.find((s) => (stock[s] ?? 0) > 0) ?? null;
 
   const [selectedSize, setSelectedSize] = useState<string | null>(
     allSizes.filter((s) => (stock[s] ?? 0) > 0).length === 1 ? firstAvail : null
   );
-  const [quantity, setQuantity]       = useState(1);
-  const [btnStatus, setBtnStatus]     = useState<BtnStatus>("idle");
-  const { addItem, openCart }         = useCartStore();
+  const [quantity, setQuantity]     = useState(1);
+  const [btnStatus, setBtnStatus]   = useState<BtnStatus>("idle");
+  const { addItem, openCart }       = useCartStore();
 
   const noStock = allSizes.every((s) => (stock[s] ?? 0) === 0);
+
+  // Cuando cambia el color (desde afuera), resetear talle seleccionado
+  const [prevIdx, setPrevIdx] = useState(selectedColorIdx);
+  if (prevIdx !== selectedColorIdx) {
+    setPrevIdx(selectedColorIdx);
+    setSelectedSize(null);
+    setQuantity(1);
+  }
+
+  // Determinar si mostramos el selector de color (>1 color Y el único no es solo "Único")
+  const showColorSelector =
+    colorVariants.length > 1 ||
+    (colorVariants.length === 1 && colorVariants[0].name !== "Único");
 
   function handleSizeSelect(size: string) {
     if ((stock[size] ?? 0) === 0) return;
@@ -39,13 +67,18 @@ export default function AddToCartSection({ product }: { product: ProductPublic }
     if (!selectedSize || btnStatus !== "idle") return;
     setBtnStatus("loading");
 
+    const activeVariant = colorVariants.length > 0 ? colorVariants[selectedColorIdx] : null;
+    const cartImage     = activeVariant?.images[0] ?? product.images[0] ?? "";
+    const colorName     = activeVariant && activeVariant.name !== "Único" ? activeVariant.name : null;
+
     setTimeout(() => {
       addItem({
         product_id: product.id,
         slug:       product.slug,
         name:       product.name,
-        image:      product.images[0] ?? "",
+        image:      cartImage,
         size:       selectedSize,
+        color:      colorName,
         price:      product.price_sale,
         quantity,
       });
@@ -67,6 +100,34 @@ export default function AddToCartSection({ product }: { product: ProductPublic }
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Selector de color — solo si hay más de 1 color */}
+      {showColorSelector && colorVariants.length > 1 && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <p className="label-tag">COLOR:</p>
+            <p className="label-tag text-brand-green">{colorVariants[selectedColorIdx]?.name.toUpperCase()}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {colorVariants.map((variant, idx) => {
+              const active = selectedColorIdx === idx;
+              return (
+                <button
+                  key={variant.name}
+                  onClick={() => onColorChange?.(idx)}
+                  className={`px-4 h-10 border label-tag text-sm transition-colors ${
+                    active
+                      ? "bg-brand-green text-brand-cream border-brand-green"
+                      : "border-border hover:border-brand-green hover:bg-brand-green/5"
+                  }`}
+                >
+                  {variant.name.toUpperCase()}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Selector de talle */}
       <div>
         <div className="flex items-center mb-3">

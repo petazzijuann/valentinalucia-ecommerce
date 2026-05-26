@@ -11,8 +11,8 @@ interface CartStore {
   shippingCp: string;
 
   addItem: (item: CartItem) => void;
-  removeItem: (productId: string, size: string) => void;
-  updateQuantity: (productId: string, size: string, quantity: number) => void;
+  removeItem: (productId: string, size: string, color: string | null) => void;
+  updateQuantity: (productId: string, size: string, color: string | null, quantity: number) => void;
   clearCart: () => void;
   openCart: () => void;
   closeCart: () => void;
@@ -22,6 +22,10 @@ interface CartStore {
   totalItems: () => number;
   totalPrice: () => number;
   totalWithShipping: () => number;
+}
+
+function sameItem(a: CartItem, b: { product_id: string; size: string; color: string | null }) {
+  return a.product_id === b.product_id && a.size === b.size && a.color === b.color;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -34,13 +38,11 @@ export const useCartStore = create<CartStore>()(
 
       addItem: (newItem) => {
         set((state) => {
-          const existing = state.items.find(
-            (i) => i.product_id === newItem.product_id && i.size === newItem.size
-          );
+          const existing = state.items.find((i) => sameItem(i, newItem));
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.product_id === newItem.product_id && i.size === newItem.size
+                sameItem(i, newItem)
                   ? { ...i, quantity: i.quantity + newItem.quantity }
                   : i
               ),
@@ -51,22 +53,22 @@ export const useCartStore = create<CartStore>()(
         });
       },
 
-      removeItem: (productId, size) => {
+      removeItem: (productId, size, color) => {
         set((state) => ({
           items: state.items.filter(
-            (i) => !(i.product_id === productId && i.size === size)
+            (i) => !sameItem(i, { product_id: productId, size, color })
           ),
         }));
       },
 
-      updateQuantity: (productId, size, quantity) => {
+      updateQuantity: (productId, size, color, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(productId, size);
+          get().removeItem(productId, size, color);
           return;
         }
         set((state) => ({
           items: state.items.map((i) =>
-            i.product_id === productId && i.size === size ? { ...i, quantity } : i
+            sameItem(i, { product_id: productId, size, color }) ? { ...i, quantity } : i
           ),
         }));
       },
@@ -88,8 +90,6 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: "vl-cart",
-      // shippingOption no se persiste (precio cotizado puede vencer)
-      // shippingCp sí se persiste para comodidad del usuario
       partialize: (state) => ({ items: state.items, shippingCp: state.shippingCp }),
     }
   )

@@ -1,32 +1,52 @@
 import { prisma } from "@/lib/prisma/client";
+import type { ColorVariant } from "@/types";
 
 export type BotState =
   | "idle"
   | "upload_waiting_photo"
   | "upload_waiting_name"
   | "upload_waiting_category"
+  // variantes de color
+  | "upload_waiting_color_decision"
+  | "upload_waiting_color_name"
+  | "upload_waiting_color_photos"
+  | "upload_waiting_color_stock"
+  | "upload_color_asking_more"
+  // flujo sin color (o después de resolver colores)
   | "upload_waiting_stock"
   | "upload_waiting_price_sale"
   | "upload_waiting_price_cost"
   | "upload_waiting_description"
   | "upload_waiting_tags"
   | "upload_confirming"
+  // ventas
   | "sale_waiting_search"
   | "sale_waiting_size"
   | "sale_waiting_quantity"
   | "sale_waiting_price"
   | "sale_waiting_payment"
-  | "sale_confirming";
+  | "sale_confirming"
+  // /addcolor
+  | "addcolor_waiting_search"
+  | "addcolor_waiting_name"
+  | "addcolor_waiting_photos"
+  | "addcolor_waiting_stock"
+  | "addcolor_confirming";
 
 export interface UploadData {
-  photo_url?:   string;
-  name?:        string;
-  category?:    string;
-  stock?:       Record<string, number>;
-  price_sale?:  number;
-  price_cost?:  number;
-  description?: string;
-  tags?:        string[];
+  photo_url?:      string;
+  name?:           string;
+  category?:       string;
+  stock?:          Record<string, number>;
+  price_sale?:     number;
+  price_cost?:     number;
+  description?:    string;
+  tags?:           string[];
+  // campos para variantes de color
+  has_colors?:     boolean;
+  current_color?:  string;
+  current_photos?: string[];
+  color_variants?: ColorVariant[];
 }
 
 export interface SaleData {
@@ -40,10 +60,19 @@ export interface SaleData {
   payment_method?:  string;
 }
 
+export interface AddColorData {
+  product_id?:   string;
+  product_name?: string;
+  color_name?:   string;
+  photos?:       string[];
+  stock?:        Record<string, number>;
+}
+
 export interface BotSessionData {
-  state:       BotState;
-  uploadData?: UploadData;
-  saleData?:   SaleData;
+  state:          BotState;
+  uploadData?:    UploadData;
+  saleData?:      SaleData;
+  addColorData?:  AddColorData;
 }
 
 export async function getSession(chatId: string): Promise<BotSessionData> {

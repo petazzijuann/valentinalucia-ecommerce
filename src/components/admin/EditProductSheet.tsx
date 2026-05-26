@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import type { ProductAdmin, StockMap } from "@/types";
+import type { ProductAdmin, StockMap, ColorVariant } from "@/types";
 
-const SIZES = ["XS", "S", "M", "L", "XL", "XXL"] as const;
+const SIZES      = ["XS", "S", "M", "L", "XL", "XXL"] as const;
 const CATEGORIES = ["remeras", "pantalones", "buzos", "accesorios", "calzado"] as const;
 
 interface Props {
@@ -14,38 +14,58 @@ interface Props {
   onSaved: () => void;
 }
 
+// Variante con stock como string (para inputs de formulario)
+interface FormColorVariant {
+  name:   string;
+  images: string[];
+  stock:  Record<string, string>;
+}
+
 interface FormState {
-  name: string;
-  description: string;
-  category: string;
-  price_sale: string;
-  price_cost: string;
-  stock: Record<string, string>;
-  tags: string;
-  is_published: boolean;
+  name:           string;
+  description:    string;
+  category:       string;
+  price_sale:     string;
+  price_cost:     string;
+  stock:          Record<string, string>;
+  tags:           string;
+  is_published:   boolean;
+  // color variants — stock como string para los inputs
+  color_variants: FormColorVariant[];
 }
 
 function toForm(p: ProductAdmin): FormState {
-  const stock = p.stock as StockMap;
+  const stock         = p.stock as StockMap;
+  const colorVariants = (p.color_variants ?? []) as ColorVariant[];
+
   return {
-    name:         p.name,
-    description:  p.description ?? "",
-    category:     p.category,
-    price_sale:   String(p.price_sale),
-    price_cost:   String(p.price_cost),
-    stock:        Object.fromEntries(SIZES.map((s) => [s, String(stock[s] ?? 0)])),
-    tags:         p.tags.join(", "),
-    is_published: p.is_published,
+    name:           p.name,
+    description:    p.description ?? "",
+    category:       p.category,
+    price_sale:     String(p.price_sale),
+    price_cost:     String(p.price_cost),
+    stock:          Object.fromEntries(SIZES.map((s) => [s, String(stock[s] ?? 0)])),
+    tags:           p.tags.join(", "),
+    is_published:   p.is_published,
+    color_variants: colorVariants.map((cv): FormColorVariant => ({
+      name:   cv.name,
+      images: cv.images,
+      stock:  Object.fromEntries(SIZES.map((s) => [s, String(cv.stock[s] ?? 0)])),
+    })),
   };
 }
 
 export default function EditProductSheet({ product, open, onOpenChange, onSaved }: Props) {
-  const [form, setForm] = useState<FormState | null>(null);
+  const [form,   setForm]   = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error,  setError]  = useState<string | null>(null);
+  const [activeColorTab, setActiveColorTab] = useState(0);
 
   useEffect(() => {
-    if (product) setForm(toForm(product));
+    if (product) {
+      setForm(toForm(product));
+      setActiveColorTab(0);
+    }
     setError(null);
   }, [product]);
 
@@ -65,17 +85,33 @@ export default function EditProductSheet({ product, open, onOpenChange, onSaved 
     const price_sale = parseFloat(form.price_sale);
     const price_cost = parseFloat(form.price_cost);
 
-    if (!form.name.trim()) { setError("El nombre es requerido."); return; }
+    if (!form.name.trim())              { setError("El nombre es requerido.");       return; }
     if (isNaN(price_sale) || price_sale <= 0) { setError("Precio de venta inválido."); return; }
     if (isNaN(price_cost) || price_cost <= 0) { setError("Precio de costo inválido."); return; }
 
     const stock = Object.fromEntries(
       SIZES.map((s) => [s, Math.max(0, parseInt(form.stock[s] ?? "0", 10) || 0)])
     );
-    const tags = form.tags
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
+    const tags = form.tags.split(",").map((t) => t.trim()).filter(Boolean);
+
+    const hasMultipleColors = form.color_variants.length > 1 ||
+      (form.color_variants.length === 1 && form.color_variants[0].name !== "Único");
+
+    // Convertir stock de color_variants a números
+    const color_variants = form.color_variants.map((cv) => ({
+      ...cv,
+      stock: Object.fromEntries(
+        Object.entries(cv.stock).map(([size, qty]) => [
+          size,
+          typeof qty === "string" ? Math.max(0, parseInt(qty, 10) || 0) : qty,
+        ])
+      ),
+    }));
+
+    // Si hay multi-color, sincronizar stock legacy con primer color para backward compat
+    const legacyStock = hasMultipleColors && color_variants.length > 0
+      ? color_variants[0].stock
+      : stock;
 
     setSaving(true);
     setError(null);
@@ -84,14 +120,15 @@ export default function EditProductSheet({ product, open, onOpenChange, onSaved 
       method:  "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name:         form.name.trim(),
-        description:  form.description.trim(),
-        category:     form.category,
+        name:           form.name.trim(),
+        description:    form.description.trim(),
+        category:       form.category,
         price_sale,
         price_cost,
-        stock,
+        stock:          legacyStock,
         tags,
-        is_published: form.is_published,
+        is_published:   form.is_published,
+        ...(form.color_variants.length > 0 && { color_variants }),
       }),
     });
 
@@ -112,6 +149,9 @@ export default function EditProductSheet({ product, open, onOpenChange, onSaved 
   function setField<K extends keyof FormState>(key: K, val: FormState[K]) {
     setForm((prev) => prev ? { ...prev, [key]: val } : prev);
   }
+
+  const isMultiColor = form.color_variants.length > 1 ||
+    (form.color_variants.length === 1 && form.color_variants[0].name !== "Único");
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -203,30 +243,107 @@ export default function EditProductSheet({ product, open, onOpenChange, onSaved 
             </div>
           </div>
 
-          {/* Stock */}
-          <div>
-            <label className="label-tag text-[10px] text-muted-foreground block mb-2">STOCK POR TALLE</label>
-            <div className="grid grid-cols-3 gap-2">
-              {SIZES.map((size) => (
-                <div key={size}>
-                  <label className="label-tag text-[9px] text-muted-foreground block mb-1">{size}</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={form.stock[size] ?? "0"}
-                    onChange={(e) =>
-                      setForm((prev) =>
-                        prev
-                          ? { ...prev, stock: { ...prev.stock, [size]: e.target.value } }
-                          : prev
-                      )
-                    }
-                    className="w-full border border-border bg-background px-2 py-1.5 text-sm outline-none focus:border-brand-green transition-colors"
-                  />
-                </div>
-              ))}
+          {/* Stock — simple si 1 color "Único", con tabs si multi-color */}
+          {!isMultiColor ? (
+            <div>
+              <label className="label-tag text-[10px] text-muted-foreground block mb-2">STOCK POR TALLE</label>
+              <div className="grid grid-cols-3 gap-2">
+                {SIZES.map((size) => (
+                  <div key={size}>
+                    <label className="label-tag text-[9px] text-muted-foreground block mb-1">{size}</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={form.stock[size] ?? "0"}
+                      onChange={(e) =>
+                        setForm((prev) =>
+                          prev ? { ...prev, stock: { ...prev.stock, [size]: e.target.value } } : prev
+                        )
+                      }
+                      className="w-full border border-border bg-background px-2 py-1.5 text-sm outline-none focus:border-brand-green transition-colors"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div>
+              <label className="label-tag text-[10px] text-muted-foreground block mb-2">STOCK POR COLOR Y TALLE</label>
+              {/* Tabs de colores */}
+              <div className="flex gap-1 mb-3 flex-wrap">
+                {form.color_variants.map((cv, idx) => (
+                  <button
+                    key={cv.name}
+                    type="button"
+                    onClick={() => setActiveColorTab(idx)}
+                    className={`label-tag text-[10px] px-3 py-1 border transition-colors ${
+                      activeColorTab === idx
+                        ? "bg-brand-green text-brand-cream border-brand-green"
+                        : "border-border hover:border-brand-green"
+                    }`}
+                  >
+                    {cv.name.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+
+              {/* Stock del color activo */}
+              {form.color_variants[activeColorTab] && (
+                <div className="grid grid-cols-3 gap-2">
+                  {SIZES.map((size) => {
+                    const cv = form.color_variants[activeColorTab];
+                    return (
+                      <div key={size}>
+                        <label className="label-tag text-[9px] text-muted-foreground block mb-1">{size}</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={String(cv.stock[size] ?? 0)}
+                          onChange={(e) =>
+                            setForm((prev) => {
+                              if (!prev) return prev;
+                              const updatedVariants = prev.color_variants.map((v, i) =>
+                                i === activeColorTab
+                                  ? { ...v, stock: { ...v.stock, [size]: e.target.value } }
+                                  : v
+                              );
+                              return { ...prev, color_variants: updatedVariants };
+                            })
+                          }
+                          className="w-full border border-border bg-background px-2 py-1.5 text-sm outline-none focus:border-brand-green transition-colors"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Fotos del color activo (readonly) */}
+              {form.color_variants[activeColorTab]?.images.length > 0 && (
+                <div className="mt-3">
+                  <p className="label-tag text-[9px] text-muted-foreground mb-2">
+                    FOTOS ({form.color_variants[activeColorTab].images.length})
+                  </p>
+                  <div className="flex gap-2 flex-wrap">
+                    {form.color_variants[activeColorTab].images.slice(0, 4).map((url, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={i}
+                        src={url}
+                        alt={`Foto ${i + 1}`}
+                        className="w-16 h-16 object-cover border border-border"
+                      />
+                    ))}
+                    {form.color_variants[activeColorTab].images.length > 4 && (
+                      <div className="w-16 h-16 bg-muted flex items-center justify-center text-xs text-muted-foreground border border-border">
+                        +{form.color_variants[activeColorTab].images.length - 4}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Tags */}
           <div>
