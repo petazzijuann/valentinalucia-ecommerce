@@ -1,6 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
-import type { DashboardMetrics, StockMap } from "@/types";
+import type { DashboardMetrics, StockMap, ColorVariant } from "@/types";
+
+/** Suma todas las unidades en stock de un producto, considerando todos los colores. */
+function getTotalUnits(p: { stock: unknown; color_variants: unknown }): number {
+  const cvs = (p.color_variants as ColorVariant[] | null) ?? [];
+  if (cvs.length > 0) {
+    return cvs.reduce(
+      (sum, cv) => sum + Object.values(cv.stock).reduce((a, q) => a + (q as number), 0),
+      0
+    );
+  }
+  return Object.values(p.stock as StockMap).reduce((a, q) => a + q, 0);
+}
+
+/** Devuelve el StockMap combinado de todos los colores (sumando por talle). */
+function getMergedStock(p: { stock: unknown; color_variants: unknown }): StockMap {
+  const cvs = (p.color_variants as ColorVariant[] | null) ?? [];
+  if (cvs.length === 0) return p.stock as StockMap;
+  const merged: StockMap = {};
+  for (const cv of cvs) {
+    for (const [size, qty] of Object.entries(cv.stock)) {
+      merged[size] = (merged[size] ?? 0) + (qty as number);
+    }
+  }
+  return merged;
+}
 
 function startOf(unit: "today" | "week" | "month"): Date {
   const now = new Date();
@@ -30,7 +55,7 @@ export async function GET(request: NextRequest) {
       orderBy: { created_at: "asc" },
     }),
     prisma.product.findMany({
-      select: { name: true, stock: true, price_sale: true, price_cost: true },
+      select: { name: true, stock: true, color_variants: true, price_sale: true, price_cost: true },
     }),
   ]);
 
@@ -59,31 +84,27 @@ export async function GET(request: NextRequest) {
       margin:       d.rev > 0 ? Math.round(((d.rev - d.cost) / d.rev) * 100) : 0,
     }));
 
-  // Low stock: any size ≤ 3
+  // Low stock: algún talle con ≤ 3 unidades en el total combinado de colores
   const low_stock = products
     .filter((p) => {
-      const s = p.stock as StockMap;
-      return Object.values(s).some((q) => q <= 3);
+      const merged = getMergedStock(p);
+      return Object.values(merged).some((q) => q > 0 && q <= 3);
     })
     .map((p) => {
-      const s = p.stock as StockMap;
+      const merged = getMergedStock(p);
       return {
         name:        p.name,
-        stock:       s,
-        total_units: Object.values(s).reduce((acc, q) => acc + q, 0),
+        stock:       merged,
+        total_units: getTotalUnits(p),
       };
     });
 
-  // Stock values
+  // Stock values — suma todos los colores de cada producto
   const stock_value_cost = products.reduce((acc, p) => {
-    const s = p.stock as StockMap;
-    const units = Object.values(s).reduce((a, q) => a + q, 0);
-    return acc + units * Number(p.price_cost);
+    return acc + getTotalUnits(p) * Number(p.price_cost);
   }, 0);
   const stock_value_sale = products.reduce((acc, p) => {
-    const s = p.stock as StockMap;
-    const units = Object.values(s).reduce((a, q) => a + q, 0);
-    return acc + units * Number(p.price_sale);
+    return acc + getTotalUnits(p) * Number(p.price_sale);
   }, 0);
 
   // Sales by day
