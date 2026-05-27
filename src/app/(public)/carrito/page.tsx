@@ -208,7 +208,7 @@ export default function CarritoPage() {
             {selectedType === "nacional" && (
               <div className="mb-4">
                 {/* Input CP */}
-                <div className="flex gap-2 mb-3">
+                <div className="flex items-stretch gap-2 mb-3">
                   <input
                     type="text"
                     inputMode="numeric"
@@ -222,7 +222,7 @@ export default function CarritoPage() {
                   <button
                     onClick={handleBuscarCP}
                     disabled={cpInput.trim().length < 4}
-                    className="label-tag text-xs px-4 py-2 border border-brand-green text-brand-green hover:bg-brand-green hover:text-brand-cream transition-colors disabled:opacity-40"
+                    className="label-tag text-xs px-4 border border-brand-green text-brand-green hover:bg-brand-green hover:text-brand-cream transition-colors disabled:opacity-40"
                   >
                     CALCULAR
                   </button>
@@ -289,9 +289,6 @@ export default function CarritoPage() {
                       );
                     })()}
 
-                    <p className="label-tag text-[10px] text-muted-foreground mt-1">
-                      * Precio aproximado. Puede variar según el peso y embalaje final.
-                    </p>
                   </div>
                 )}
               </div>

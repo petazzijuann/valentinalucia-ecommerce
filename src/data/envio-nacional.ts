@@ -15,25 +15,21 @@ export const PESO_BASE_G = 500;
 
 /** Rangos de CP → tarifa. Los rangos son inclusivos [desde, hasta]. */
 const ZONAS: Array<{ desde: number; hasta: number; tarifa: TarifaZona }> = [
-  // CABA (1000-1499) y Gran Buenos Aires / La Plata (1500-1999)
   {
-    desde: 1000, hasta: 1999,
-    tarifa: { nombre: "Buenos Aires / CABA / La Plata", sucursal: 9200, domicilio: 12700 },
+    desde: 0, hasta: 1000,
+    tarifa: { nombre: "Buenos Aires / CABA", sucursal: 9200, domicilio: 12700 },
   },
-  // Chaco (3500-3599)
   {
-    desde: 3500, hasta: 3599,
-    tarifa: { nombre: "Chaco", sucursal: 9300, domicilio: 12700 },
+    desde: 2000, hasta: 3500,
+    tarifa: { nombre: "Litoral / Centro", sucursal: 9300, domicilio: 12700 },
   },
-  // Catamarca (4700-4799)
   {
-    desde: 4700, hasta: 4799,
-    tarifa: { nombre: "Catamarca", sucursal: 10450, domicilio: 14300 },
+    desde: 3600, hasta: 4669,
+    tarifa: { nombre: "NOA / Noroeste", sucursal: 10450, domicilio: 14300 },
   },
-  // Tierra del Fuego (9400-9499)
   {
-    desde: 9400, hasta: 9499,
-    tarifa: { nombre: "Tierra del Fuego", sucursal: 11780, domicilio: 15300 },
+    desde: 4800, hasta: 9399,
+    tarifa: { nombre: "Patagonia / Sur", sucursal: 11780, domicilio: 15300 },
   },
 ];
 
