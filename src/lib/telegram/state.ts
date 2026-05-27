@@ -17,6 +17,7 @@ export type BotState =
   | "upload_waiting_price_sale"
   | "upload_waiting_price_cost"
   | "upload_waiting_description"
+  | "upload_waiting_weight"
   | "upload_waiting_tags"
   | "upload_confirming"
   // ventas
@@ -47,6 +48,7 @@ export interface UploadData {
   price_sale?:     number;
   price_cost?:     number;
   description?:    string;
+  weight_g?:       number;    // peso en gramos (opcional, se puede omitir)
   tags?:           string[];
   // campos para variantes de color
   has_colors?:     boolean;

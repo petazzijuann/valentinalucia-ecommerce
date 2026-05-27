@@ -953,6 +953,9 @@ export const OrderScalarFieldEnum = {
   shipping_days_label: 'shipping_days_label',
   carrier_tracking_id: 'carrier_tracking_id',
   carrier_order_id: 'carrier_order_id',
+  shipping_carrier: 'shipping_carrier',
+  shipping_carrier_name: 'shipping_carrier_name',
+  shipping_service_id: 'shipping_service_id',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const

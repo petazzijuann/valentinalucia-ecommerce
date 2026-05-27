@@ -139,12 +139,12 @@ export interface CreateOrderResponse {
   transfer_info?: TransferInfo;
 }
 
-export interface ShippingOption {
-  type:        string;      // "rosario" | "retiro_local" | carrier id from Envia.com
-  label:       string;
-  days_label:  string;
-  cost:        number;
-  carrier_id?: string;      // id interno de Envia.com (para crear la orden luego)
+export interface EnvioOption {
+  carrier_id:   string;   // "andreani" | "correo-argentino" | "rosario" | "retiro_local"
+  carrier_name: string;   // label a mostrar, ej: "Andreani", "Correo Argentino"
+  days_label:   string;
+  cost:         number;   // ARS, ya con markup
+  service_id:   string;
 }
 
 export interface CartItem {

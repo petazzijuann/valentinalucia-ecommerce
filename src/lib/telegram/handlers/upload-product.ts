@@ -384,8 +384,30 @@ export async function handleText(ctx: Context) {
     case "upload_waiting_description": {
       await setSession(chatId, {
         ...session,
-        state: "upload_waiting_tags",
+        state: "upload_waiting_weight",
         uploadData: { ...session.uploadData, description: text },
+      });
+      await ctx.reply(
+        "⚖️ ¿Cuánto pesa el producto en gramos? _(Ej: 250)_\nEscribí *OMITIR* si no lo sabés.",
+        { parse_mode: "Markdown" }
+      );
+      break;
+    }
+
+    case "upload_waiting_weight": {
+      let weight_g: number | undefined = undefined;
+      if (text.toUpperCase() !== "OMITIR") {
+        const parsed = parseInt(text.replace(/[^\d]/g, ""), 10);
+        if (isNaN(parsed) || parsed <= 0) {
+          await ctx.reply("❌ Peso inválido. Enviá un número en gramos (ej: 250) o escribí *OMITIR*.", { parse_mode: "Markdown" });
+          break;
+        }
+        weight_g = parsed;
+      }
+      await setSession(chatId, {
+        ...session,
+        state: "upload_waiting_tags",
+        uploadData: { ...session.uploadData, weight_g },
       });
       await ctx.reply(
         "🔖 ¿Tags? Escribilos separados por coma.\n_(Ej: oversize, algodón, básico, verano)_",
@@ -569,6 +591,7 @@ export async function handleCallback(ctx: Context) {
         price_cost:     d.price_cost!,
         stock:          legacyStock,
         color_variants: JSON.parse(JSON.stringify(colorVariants)),
+        weight_g:       d.weight_g ?? null,
         is_published:   false,
       },
     });
