@@ -8,7 +8,7 @@ import { useCartStore } from "@/store/cart";
 import { formatARS } from "@/lib/utils";
 import type { ShippingOption } from "@/types";
 
-type ShippingType = "rosario" | "retiro_local" | "andreani";
+type ShippingType = "rosario" | "retiro_local" | "nacional";
 type QuoteStatus  = "idle" | "loading" | "done" | "error";
 
 const FIXED_OPTIONS: Record<"rosario" | "retiro_local", ShippingOption> = {
@@ -27,16 +27,16 @@ const FIXED_OPTIONS: Record<"rosario" | "retiro_local", ShippingOption> = {
 };
 
 const SHIPPING_TYPES: { id: ShippingType; label: string; sub: string }[] = [
-  { id: "rosario",      label: "Envío en Rosario",  sub: `${formatARS(3000)}` },
-  { id: "retiro_local", label: "Retiro en local",   sub: "Gratis · España 1541" },
-  { id: "andreani",     label: "Envío Andreani",    sub: "Calculá por CP" },
+  { id: "rosario",      label: "Envío en Rosario",         sub: `${formatARS(3000)}` },
+  { id: "retiro_local", label: "Retiro en local",          sub: "Gratis · España 1541" },
+  { id: "nacional",     label: "Envío a todo el país",     sub: "Calculá por CP" },
 ];
 
 function deriveType(opt: ShippingOption | null): ShippingType | null {
   if (!opt) return null;
   if (opt.type === "rosario")      return "rosario";
   if (opt.type === "retiro_local") return "retiro_local";
-  return "andreani";
+  return "nacional";
 }
 
 export default function CarritoPage() {
@@ -72,7 +72,7 @@ export default function CarritoPage() {
     if (type === "rosario" || type === "retiro_local") {
       setShippingOption(FIXED_OPTIONS[type]);
     } else {
-      // andreani: limpiar hasta que el usuario calcule
+      // nacional: limpiar hasta que el usuario calcule
       setShippingOption(null);
     }
   }
@@ -87,7 +87,15 @@ export default function CarritoPage() {
     setShippingOption(null);
 
     try {
-      const res  = await fetch(`/api/shipping/quote?cp=${encodeURIComponent(cpInput.trim())}`);
+      const res  = await fetch("/api/shipping/quote", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          cp:           cpInput.trim(),
+          items:        items.map((i) => ({ product_id: i.product_id, qty: i.quantity })),
+          total_amount: totalPrice(),
+        }),
+      });
       const data = await res.json() as { options: ShippingOption[]; error?: string };
 
       if (data.error || data.options.length === 0) {
@@ -218,8 +226,8 @@ export default function CarritoPage() {
                 })}
               </div>
 
-              {/* Bloque Andreani: CP + opciones */}
-              {selectedType === "andreani" && (
+              {/* Envío nacional: CP + opciones de transportistas */}
+              {selectedType === "nacional" && (
                 <div className="mt-2">
                   <div className="flex gap-2 mb-3">
                     <input

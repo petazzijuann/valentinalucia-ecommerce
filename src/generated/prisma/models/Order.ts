@@ -50,8 +50,8 @@ export type OrderMinAggregateOutputType = {
   shipping_cost: runtime.Decimal | null
   shipping_cp: string | null
   shipping_days_label: string | null
-  andreani_tracking_id: string | null
-  andreani_order_id: string | null
+  carrier_tracking_id: string | null
+  carrier_order_id: string | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -70,8 +70,8 @@ export type OrderMaxAggregateOutputType = {
   shipping_cost: runtime.Decimal | null
   shipping_cp: string | null
   shipping_days_label: string | null
-  andreani_tracking_id: string | null
-  andreani_order_id: string | null
+  carrier_tracking_id: string | null
+  carrier_order_id: string | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -92,8 +92,8 @@ export type OrderCountAggregateOutputType = {
   shipping_cost: number
   shipping_cp: number
   shipping_days_label: number
-  andreani_tracking_id: number
-  andreani_order_id: number
+  carrier_tracking_id: number
+  carrier_order_id: number
   created_at: number
   updated_at: number
   _all: number
@@ -124,8 +124,8 @@ export type OrderMinAggregateInputType = {
   shipping_cost?: true
   shipping_cp?: true
   shipping_days_label?: true
-  andreani_tracking_id?: true
-  andreani_order_id?: true
+  carrier_tracking_id?: true
+  carrier_order_id?: true
   created_at?: true
   updated_at?: true
 }
@@ -144,8 +144,8 @@ export type OrderMaxAggregateInputType = {
   shipping_cost?: true
   shipping_cp?: true
   shipping_days_label?: true
-  andreani_tracking_id?: true
-  andreani_order_id?: true
+  carrier_tracking_id?: true
+  carrier_order_id?: true
   created_at?: true
   updated_at?: true
 }
@@ -166,8 +166,8 @@ export type OrderCountAggregateInputType = {
   shipping_cost?: true
   shipping_cp?: true
   shipping_days_label?: true
-  andreani_tracking_id?: true
-  andreani_order_id?: true
+  carrier_tracking_id?: true
+  carrier_order_id?: true
   created_at?: true
   updated_at?: true
   _all?: true
@@ -275,8 +275,8 @@ export type OrderGroupByOutputType = {
   shipping_cost: runtime.Decimal | null
   shipping_cp: string | null
   shipping_days_label: string | null
-  andreani_tracking_id: string | null
-  andreani_order_id: string | null
+  carrier_tracking_id: string | null
+  carrier_order_id: string | null
   created_at: Date
   updated_at: Date
   _count: OrderCountAggregateOutputType | null
@@ -320,8 +320,8 @@ export type OrderWhereInput = {
   shipping_cost?: Prisma.DecimalNullableFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: Prisma.StringNullableFilter<"Order"> | string | null
   shipping_days_label?: Prisma.StringNullableFilter<"Order"> | string | null
-  andreani_tracking_id?: Prisma.StringNullableFilter<"Order"> | string | null
-  andreani_order_id?: Prisma.StringNullableFilter<"Order"> | string | null
+  carrier_tracking_id?: Prisma.StringNullableFilter<"Order"> | string | null
+  carrier_order_id?: Prisma.StringNullableFilter<"Order"> | string | null
   created_at?: Prisma.DateTimeFilter<"Order"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Order"> | Date | string
   sales?: Prisma.SaleListRelationFilter
@@ -343,8 +343,8 @@ export type OrderOrderByWithRelationInput = {
   shipping_cost?: Prisma.SortOrderInput | Prisma.SortOrder
   shipping_cp?: Prisma.SortOrderInput | Prisma.SortOrder
   shipping_days_label?: Prisma.SortOrderInput | Prisma.SortOrder
-  andreani_tracking_id?: Prisma.SortOrderInput | Prisma.SortOrder
-  andreani_order_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  carrier_tracking_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  carrier_order_id?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   sales?: Prisma.SaleOrderByRelationAggregateInput
@@ -369,8 +369,8 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   shipping_cost?: Prisma.DecimalNullableFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: Prisma.StringNullableFilter<"Order"> | string | null
   shipping_days_label?: Prisma.StringNullableFilter<"Order"> | string | null
-  andreani_tracking_id?: Prisma.StringNullableFilter<"Order"> | string | null
-  andreani_order_id?: Prisma.StringNullableFilter<"Order"> | string | null
+  carrier_tracking_id?: Prisma.StringNullableFilter<"Order"> | string | null
+  carrier_order_id?: Prisma.StringNullableFilter<"Order"> | string | null
   created_at?: Prisma.DateTimeFilter<"Order"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Order"> | Date | string
   sales?: Prisma.SaleListRelationFilter
@@ -392,8 +392,8 @@ export type OrderOrderByWithAggregationInput = {
   shipping_cost?: Prisma.SortOrderInput | Prisma.SortOrder
   shipping_cp?: Prisma.SortOrderInput | Prisma.SortOrder
   shipping_days_label?: Prisma.SortOrderInput | Prisma.SortOrder
-  andreani_tracking_id?: Prisma.SortOrderInput | Prisma.SortOrder
-  andreani_order_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  carrier_tracking_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  carrier_order_id?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   _count?: Prisma.OrderCountOrderByAggregateInput
@@ -422,8 +422,8 @@ export type OrderScalarWhereWithAggregatesInput = {
   shipping_cost?: Prisma.DecimalNullableWithAggregatesFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   shipping_days_label?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
-  andreani_tracking_id?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
-  andreani_order_id?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  carrier_tracking_id?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  carrier_order_id?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
 }
@@ -444,8 +444,8 @@ export type OrderCreateInput = {
   shipping_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: string | null
   shipping_days_label?: string | null
-  andreani_tracking_id?: string | null
-  andreani_order_id?: string | null
+  carrier_tracking_id?: string | null
+  carrier_order_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   sales?: Prisma.SaleCreateNestedManyWithoutOrderInput
@@ -467,8 +467,8 @@ export type OrderUncheckedCreateInput = {
   shipping_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: string | null
   shipping_days_label?: string | null
-  andreani_tracking_id?: string | null
-  andreani_order_id?: string | null
+  carrier_tracking_id?: string | null
+  carrier_order_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   sales?: Prisma.SaleUncheckedCreateNestedManyWithoutOrderInput
@@ -490,8 +490,8 @@ export type OrderUpdateInput = {
   shipping_cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipping_days_label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  andreani_tracking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  andreani_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carrier_tracking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carrier_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sales?: Prisma.SaleUpdateManyWithoutOrderNestedInput
@@ -513,8 +513,8 @@ export type OrderUncheckedUpdateInput = {
   shipping_cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipping_days_label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  andreani_tracking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  andreani_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carrier_tracking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carrier_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sales?: Prisma.SaleUncheckedUpdateManyWithoutOrderNestedInput
@@ -536,8 +536,8 @@ export type OrderCreateManyInput = {
   shipping_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: string | null
   shipping_days_label?: string | null
-  andreani_tracking_id?: string | null
-  andreani_order_id?: string | null
+  carrier_tracking_id?: string | null
+  carrier_order_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -558,8 +558,8 @@ export type OrderUpdateManyMutationInput = {
   shipping_cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipping_days_label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  andreani_tracking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  andreani_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carrier_tracking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carrier_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -580,8 +580,8 @@ export type OrderUncheckedUpdateManyInput = {
   shipping_cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipping_days_label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  andreani_tracking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  andreani_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carrier_tracking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carrier_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -607,8 +607,8 @@ export type OrderCountOrderByAggregateInput = {
   shipping_cost?: Prisma.SortOrder
   shipping_cp?: Prisma.SortOrder
   shipping_days_label?: Prisma.SortOrder
-  andreani_tracking_id?: Prisma.SortOrder
-  andreani_order_id?: Prisma.SortOrder
+  carrier_tracking_id?: Prisma.SortOrder
+  carrier_order_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -632,8 +632,8 @@ export type OrderMaxOrderByAggregateInput = {
   shipping_cost?: Prisma.SortOrder
   shipping_cp?: Prisma.SortOrder
   shipping_days_label?: Prisma.SortOrder
-  andreani_tracking_id?: Prisma.SortOrder
-  andreani_order_id?: Prisma.SortOrder
+  carrier_tracking_id?: Prisma.SortOrder
+  carrier_order_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -652,8 +652,8 @@ export type OrderMinOrderByAggregateInput = {
   shipping_cost?: Prisma.SortOrder
   shipping_cp?: Prisma.SortOrder
   shipping_days_label?: Prisma.SortOrder
-  andreani_tracking_id?: Prisma.SortOrder
-  andreani_order_id?: Prisma.SortOrder
+  carrier_tracking_id?: Prisma.SortOrder
+  carrier_order_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -703,8 +703,8 @@ export type OrderCreateWithoutSalesInput = {
   shipping_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: string | null
   shipping_days_label?: string | null
-  andreani_tracking_id?: string | null
-  andreani_order_id?: string | null
+  carrier_tracking_id?: string | null
+  carrier_order_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -725,8 +725,8 @@ export type OrderUncheckedCreateWithoutSalesInput = {
   shipping_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: string | null
   shipping_days_label?: string | null
-  andreani_tracking_id?: string | null
-  andreani_order_id?: string | null
+  carrier_tracking_id?: string | null
+  carrier_order_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -763,8 +763,8 @@ export type OrderUpdateWithoutSalesInput = {
   shipping_cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipping_days_label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  andreani_tracking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  andreani_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carrier_tracking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carrier_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -785,8 +785,8 @@ export type OrderUncheckedUpdateWithoutSalesInput = {
   shipping_cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   shipping_cp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   shipping_days_label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  andreani_tracking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  andreani_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carrier_tracking_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carrier_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -838,8 +838,8 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   shipping_cost?: boolean
   shipping_cp?: boolean
   shipping_days_label?: boolean
-  andreani_tracking_id?: boolean
-  andreani_order_id?: boolean
+  carrier_tracking_id?: boolean
+  carrier_order_id?: boolean
   created_at?: boolean
   updated_at?: boolean
   sales?: boolean | Prisma.Order$salesArgs<ExtArgs>
@@ -862,8 +862,8 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   shipping_cost?: boolean
   shipping_cp?: boolean
   shipping_days_label?: boolean
-  andreani_tracking_id?: boolean
-  andreani_order_id?: boolean
+  carrier_tracking_id?: boolean
+  carrier_order_id?: boolean
   created_at?: boolean
   updated_at?: boolean
 }, ExtArgs["result"]["order"]>
@@ -884,8 +884,8 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   shipping_cost?: boolean
   shipping_cp?: boolean
   shipping_days_label?: boolean
-  andreani_tracking_id?: boolean
-  andreani_order_id?: boolean
+  carrier_tracking_id?: boolean
+  carrier_order_id?: boolean
   created_at?: boolean
   updated_at?: boolean
 }, ExtArgs["result"]["order"]>
@@ -906,13 +906,13 @@ export type OrderSelectScalar = {
   shipping_cost?: boolean
   shipping_cp?: boolean
   shipping_days_label?: boolean
-  andreani_tracking_id?: boolean
-  andreani_order_id?: boolean
+  carrier_tracking_id?: boolean
+  carrier_order_id?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "customer_name" | "customer_email" | "customer_phone" | "customer_address" | "items" | "total_amount" | "status" | "payment_method" | "payment_proof_url" | "astropay_payment_id" | "shipping_method" | "shipping_cost" | "shipping_cp" | "shipping_days_label" | "andreani_tracking_id" | "andreani_order_id" | "created_at" | "updated_at", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "customer_name" | "customer_email" | "customer_phone" | "customer_address" | "items" | "total_amount" | "status" | "payment_method" | "payment_proof_url" | "astropay_payment_id" | "shipping_method" | "shipping_cost" | "shipping_cp" | "shipping_days_label" | "carrier_tracking_id" | "carrier_order_id" | "created_at" | "updated_at", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sales?: boolean | Prisma.Order$salesArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
@@ -941,8 +941,8 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     shipping_cost: runtime.Decimal | null
     shipping_cp: string | null
     shipping_days_label: string | null
-    andreani_tracking_id: string | null
-    andreani_order_id: string | null
+    carrier_tracking_id: string | null
+    carrier_order_id: string | null
     created_at: Date
     updated_at: Date
   }, ExtArgs["result"]["order"]>
@@ -1384,8 +1384,8 @@ export interface OrderFieldRefs {
   readonly shipping_cost: Prisma.FieldRef<"Order", 'Decimal'>
   readonly shipping_cp: Prisma.FieldRef<"Order", 'String'>
   readonly shipping_days_label: Prisma.FieldRef<"Order", 'String'>
-  readonly andreani_tracking_id: Prisma.FieldRef<"Order", 'String'>
-  readonly andreani_order_id: Prisma.FieldRef<"Order", 'String'>
+  readonly carrier_tracking_id: Prisma.FieldRef<"Order", 'String'>
+  readonly carrier_order_id: Prisma.FieldRef<"Order", 'String'>
   readonly created_at: Prisma.FieldRef<"Order", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"Order", 'DateTime'>
 }

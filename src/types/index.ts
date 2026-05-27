@@ -140,10 +140,11 @@ export interface CreateOrderResponse {
 }
 
 export interface ShippingOption {
-  type: "rosario" | "retiro_local" | "andreani_standard" | "andreani_express";
-  label: string;
-  days_label: string;
-  cost: number;
+  type:        string;      // "rosario" | "retiro_local" | carrier id from Envia.com
+  label:       string;
+  days_label:  string;
+  cost:        number;
+  carrier_id?: string;      // id interno de Envia.com (para crear la orden luego)
 }
 
 export interface CartItem {

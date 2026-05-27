@@ -904,6 +904,10 @@ export const ProductScalarFieldEnum = {
   price_cost: 'price_cost',
   stock: 'stock',
   color_variants: 'color_variants',
+  weight_g: 'weight_g',
+  length_cm: 'length_cm',
+  width_cm: 'width_cm',
+  height_cm: 'height_cm',
   is_published: 'is_published',
   instagram_posted: 'instagram_posted',
   created_at: 'created_at',
@@ -947,8 +951,8 @@ export const OrderScalarFieldEnum = {
   shipping_cost: 'shipping_cost',
   shipping_cp: 'shipping_cp',
   shipping_days_label: 'shipping_days_label',
-  andreani_tracking_id: 'andreani_tracking_id',
-  andreani_order_id: 'andreani_order_id',
+  carrier_tracking_id: 'carrier_tracking_id',
+  carrier_order_id: 'carrier_order_id',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
@@ -1077,6 +1081,20 @@ export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
 
 
 /**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
@@ -1094,20 +1112,6 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
-    
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 

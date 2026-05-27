@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma/client";
-import { crearOrdenEnvio } from "@/lib/andreani/client";
-import type { OrderItem, StockMap, CustomerAddress } from "@/types";
+import type { OrderItem, StockMap } from "@/types";
 
 export async function reserveStock(orderId: string) {
   const order = await prisma.order.findUnique({ where: { id: orderId } });
@@ -47,35 +46,8 @@ export async function fulfillOrder(orderId: string, paymentMethod: string) {
 
   await prisma.order.update({ where: { id: orderId }, data: { status: "payment_confirmed" } });
 
-  // Crear orden en Andreani automáticamente al confirmar el pago
-  const isAndreani =
-    order.shipping_method === "andreani_standard" ||
-    order.shipping_method === "andreani_express";
-
-  if (isAndreani) {
-    try {
-      const address = order.customer_address as unknown as CustomerAddress;
-      const result  = await crearOrdenEnvio({
-        orderId:         order.id,
-        customerName:    order.customer_name,
-        customerAddress: address,
-        shippingMethod:  order.shipping_method!,
-        totalAmount:     Number(order.total_amount),
-        items:           items.map((i) => ({ name: i.name, qty: i.qty })),
-      });
-
-      await prisma.order.update({
-        where: { id: orderId },
-        data: {
-          andreani_tracking_id: result.trackingId,
-          andreani_order_id:    result.andreaniOrderId,
-        },
-      });
-    } catch (err) {
-      // Si Andreani falla, el pedido igual queda confirmado
-      console.error("Andreani crear orden error:", err);
-    }
-  }
+  // TODO: crear orden en Envia.com cuando se confirma el pago
+  // Guardar result.trackingId → carrier_tracking_id, result.orderId → carrier_order_id
 }
 
 export async function releaseStock(orderId: string) {

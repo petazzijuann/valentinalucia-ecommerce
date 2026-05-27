@@ -72,9 +72,9 @@ model Order {
   shipping_cp          String?
   shipping_days_label  String?
 
-  // Andreani
-  andreani_tracking_id String?
-  andreani_order_id    String?
+  // Carrier (Envia.com)
+  carrier_tracking_id String?
+  carrier_order_id    String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

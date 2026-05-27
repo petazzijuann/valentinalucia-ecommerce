@@ -87,6 +87,10 @@ export const ProductScalarFieldEnum = {
   price_cost: 'price_cost',
   stock: 'stock',
   color_variants: 'color_variants',
+  weight_g: 'weight_g',
+  length_cm: 'length_cm',
+  width_cm: 'width_cm',
+  height_cm: 'height_cm',
   is_published: 'is_published',
   instagram_posted: 'instagram_posted',
   created_at: 'created_at',
@@ -130,8 +134,8 @@ export const OrderScalarFieldEnum = {
   shipping_cost: 'shipping_cost',
   shipping_cp: 'shipping_cp',
   shipping_days_label: 'shipping_days_label',
-  andreani_tracking_id: 'andreani_tracking_id',
-  andreani_order_id: 'andreani_order_id',
+  carrier_tracking_id: 'carrier_tracking_id',
+  carrier_order_id: 'carrier_order_id',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
