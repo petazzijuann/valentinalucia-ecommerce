@@ -27,11 +27,12 @@ export interface EnviaCarrierOption {
 }
 
 export async function cotizarEnvio(input: EnviaQuoteInput): Promise<EnviaCarrierOption[]> {
-  const cpOrigen = process.env.ENVIA_ORIGIN_CP;
-  const widthCm  = parseFloat(process.env.ENVIA_PACKAGE_WIDTH_CM  ?? "20");
-  const heightCm = parseFloat(process.env.ENVIA_PACKAGE_HEIGHT_CM ?? "5");
-  const lengthCm = parseFloat(process.env.ENVIA_PACKAGE_LENGTH_CM ?? "30");
-  const pesoKg   = input.pesoTotalGramos / 1000;
+  const cpOrigen    = process.env.ENVIA_ORIGIN_CP;
+  const widthCm     = parseFloat(process.env.ENVIA_PACKAGE_WIDTH_CM  ?? "20");
+  const heightCm    = parseFloat(process.env.ENVIA_PACKAGE_HEIGHT_CM ?? "5");
+  const lengthCm    = parseFloat(process.env.ENVIA_PACKAGE_LENGTH_CM ?? "30");
+  const markupPct   = parseFloat(process.env.ENVIA_MARKUP_PERCENT    ?? "0");
+  const pesoKg      = input.pesoTotalGramos / 1000;
 
   const res = await fetch(`${BASE}/ship/rate/`, {
     method:  "POST",
@@ -54,10 +55,16 @@ export async function cotizarEnvio(input: EnviaQuoteInput): Promise<EnviaCarrier
   if (!res.ok) throw new Error(`Envia.com cotizar: HTTP ${res.status}`);
 
   const data = await res.json();
-  return mapQuoteResponse(data);
+  return mapQuoteResponse(data, markupPct);
 }
 
-function mapQuoteResponse(data: unknown): EnviaCarrierOption[] {
+function applyMarkup(baseCost: number, markupPct: number): number {
+  if (!markupPct || markupPct <= 0) return baseCost;
+  // Redondear al entero más cercano para no mostrar decimales en ARS
+  return Math.round(baseCost * (1 + markupPct / 100));
+}
+
+function mapQuoteResponse(data: unknown, markupPct: number): EnviaCarrierOption[] {
   // Estructura esperada según la doc de Envia.com — ajustar al response real.
   const carriers = Array.isArray(data)
     ? data
@@ -66,7 +73,8 @@ function mapQuoteResponse(data: unknown): EnviaCarrierOption[] {
   return (carriers as Record<string, unknown>[]).map((c) => {
     const carrierName = String(c.carrier ?? c.name ?? "").toLowerCase();
     const days        = String(c.estimated_days ?? c.days ?? "");
-    const cost        = Number(c.total_price ?? c.price ?? c.cost ?? 0);
+    const rawCost     = Number(c.total_price ?? c.price ?? c.cost ?? 0);
+    const cost        = applyMarkup(rawCost, markupPct);
 
     const labelMap: Record<string, string> = {
       andreani:           "Andreani",
