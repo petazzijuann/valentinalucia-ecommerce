@@ -70,6 +70,15 @@ export async function POST(request: NextRequest) {
 
   await reserveStock(order.id);
 
+  // Suscribir el email del cliente automáticamente (silencioso: no falla si ya existe)
+  try {
+    await prisma.subscriber.upsert({
+      where:  { email: data.customer_email },
+      update: {},
+      create: { email: data.customer_email },
+    });
+  } catch { /* ignorar */ }
+
   const response: CreateOrderResponse = {
     order_id:       order.id,
     total_amount:   total,

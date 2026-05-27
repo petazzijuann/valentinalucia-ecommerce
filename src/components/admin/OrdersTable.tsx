@@ -6,10 +6,19 @@ import { formatARS } from "@/lib/utils";
 import type { OrderItem } from "@/types";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 
+interface CustomerAddress {
+  street:   string;
+  city:     string;
+  province: string;
+  zip:      string;
+}
+
 interface AdminOrder {
   id: string;
-  customer_name: string;
-  customer_phone: string;
+  customer_name:    string;
+  customer_email:   string;
+  customer_phone:   string;
+  customer_address: CustomerAddress;
   items: OrderItem[];
   total_amount: number;
   payment_method: string;
@@ -118,7 +127,6 @@ export default function OrdersTable() {
                   <div>
                     <div className="flex items-center gap-3 mb-1">
                       <span className="font-medium">{order.customer_name}</span>
-                      <span className="text-muted-foreground text-sm">{order.customer_phone}</span>
                       <span className={`label-tag text-[10px] px-2 py-0.5 ${status.cls}`}>
                         {status.label}
                       </span>
@@ -130,6 +138,21 @@ export default function OrdersTable() {
                         hour: "2-digit", minute: "2-digit",
                       })} · {order.payment_method}
                     </p>
+                    {/* Datos de contacto */}
+                    <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1.5">
+                      <a href={`mailto:${order.customer_email}`} className="label-tag text-[10px] text-brand-green hover:underline">
+                        {order.customer_email}
+                      </a>
+                      <a href={`tel:${order.customer_phone}`} className="label-tag text-[10px] text-muted-foreground hover:text-foreground">
+                        {order.customer_phone}
+                      </a>
+                    </div>
+                    {/* Dirección */}
+                    {order.customer_address && (
+                      <p className="label-tag text-[10px] text-muted-foreground mt-0.5">
+                        {order.customer_address.street}, {order.customer_address.city}, {order.customer_address.province} ({order.customer_address.zip})
+                      </p>
+                    )}
                   </div>
                   <p className="price-text text-lg shrink-0">{formatARS(order.total_amount)}</p>
                 </div>

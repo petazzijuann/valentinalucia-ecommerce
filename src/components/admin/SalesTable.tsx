@@ -7,6 +7,12 @@ import type { SaleRecord } from "@/types";
 import { formatARS } from "@/lib/utils";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 
+interface SaleWithCustomer extends SaleRecord {
+  customer_name?:  string | null;
+  customer_email?: string | null;
+  customer_phone?: string | null;
+}
+
 const fetcher = (url: string) =>
   fetch(url).then((r) => r.json() as Promise<SaleRecord[]>);
 
@@ -23,15 +29,15 @@ function MarginBadge({ sale, cost }: { sale: number; cost: number }) {
 
 const HEADERS = [
   "FECHA", "PRODUCTO", "TALLE", "U.",
-  "PRECIO", "COSTO", "MARGEN", "CANAL", "PAGO", "",
+  "PRECIO", "COSTO", "MARGEN", "CANAL", "PAGO", "CLIENTE", "",
 ];
 
 export default function SalesTable() {
-  const { data: sales, isLoading, mutate } = useSWR<SaleRecord[]>(
+  const { data: sales, isLoading, mutate } = useSWR<SaleWithCustomer[]>(
     "/api/admin/sales?limit=200",
     fetcher
   );
-  const [deleteSale, setDeleteSale] = useState<SaleRecord | null>(null);
+  const [deleteSale, setDeleteSale] = useState<SaleWithCustomer | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting,   setDeleting]   = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
@@ -45,7 +51,7 @@ export default function SalesTable() {
     window.open("/api/admin/sales?format=csv", "_blank");
   }
 
-  function openDelete(sale: SaleRecord) {
+  function openDelete(sale: SaleWithCustomer) {
     setDeleteSale(sale);
     setDeleteOpen(true);
   }
@@ -154,6 +160,23 @@ export default function SalesTable() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{s.payment_method}</td>
+                    <td className="px-4 py-3 max-w-[160px]">
+                      {s.customer_name ? (
+                        <div>
+                          <p className="text-xs truncate">{s.customer_name}</p>
+                          {s.customer_email && (
+                            <a
+                              href={`mailto:${s.customer_email}`}
+                              className="label-tag text-[10px] text-brand-green hover:underline truncate block"
+                            >
+                              {s.customer_email}
+                            </a>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <button
                         onClick={() => openDelete(s)}
