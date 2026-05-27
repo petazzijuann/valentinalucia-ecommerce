@@ -208,7 +208,7 @@ export default function CarritoPage() {
             {selectedType === "nacional" && (
               <div className="mb-4">
                 {/* Input CP */}
-                <div className="flex items-stretch gap-2 mb-3">
+                <div className="flex gap-2 mb-3">
                   <input
                     type="text"
                     inputMode="numeric"
@@ -217,12 +217,12 @@ export default function CarritoPage() {
                     onChange={(e) => setCpInput(e.target.value.replace(/\D/g, ""))}
                     onKeyDown={(e) => e.key === "Enter" && handleBuscarCP()}
                     placeholder="Código postal"
-                    className="flex-1 border border-border px-3 py-2 text-sm focus:outline-none focus:border-brand-green transition-colors bg-background"
+                    className="flex-1 h-10 border border-border px-3 text-sm focus:outline-none focus:border-brand-green transition-colors bg-background"
                   />
                   <button
                     onClick={handleBuscarCP}
                     disabled={cpInput.trim().length < 4}
-                    className="label-tag text-xs px-4 border border-brand-green text-brand-green hover:bg-brand-green hover:text-brand-cream transition-colors disabled:opacity-40"
+                    className="h-10 px-4 label-tag text-xs border border-brand-green text-brand-green hover:bg-brand-green hover:text-brand-cream transition-colors disabled:opacity-40 whitespace-nowrap"
                   >
                     CALCULAR
                   </button>
