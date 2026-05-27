@@ -15,11 +15,10 @@ interface AdminOrder {
   payment_method: string;
   status: string;
   created_at: string;
-  shipping_method:       string | null;
-  shipping_cost:         number | null;
-  shipping_days_label:   string | null;
-  shipping_carrier_name: string | null;
-  carrier_tracking_id:   string | null;
+  shipping_method:      string | null;
+  shipping_cost:        number | null;
+  shipping_days_label:  string | null;
+  carrier_tracking_id:  string | null;
 }
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json() as Promise<AdminOrder[]>);
@@ -147,10 +146,10 @@ export default function OrdersTable() {
                 {order.shipping_method && (
                   <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 pt-1">
                     <span className="label-tag">
-                      {order.shipping_carrier_name ??
-                       (order.shipping_method === "rosario"      ? "Envío en Rosario" :
-                        order.shipping_method === "retiro_local" ? "Retiro en local"  :
-                        order.shipping_method)}
+                      {order.shipping_method === "rosario"      ? "Envío en Rosario"        :
+                       order.shipping_method === "retiro_local" ? "Retiro en local"          :
+                       order.shipping_method === "nacional"     ? "Envío a todo el país"     :
+                       order.shipping_method}
                       {order.shipping_days_label ? ` · ${order.shipping_days_label}` : ""}
                       {order.shipping_cost ? ` · ${formatARS(order.shipping_cost)}` : ""}
                     </span>

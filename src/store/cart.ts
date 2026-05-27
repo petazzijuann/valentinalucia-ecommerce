@@ -2,22 +2,25 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { CartItem } from "@/types";
+import type { CartItem, ShippingOption } from "@/types";
 
 interface CartStore {
   items: CartItem[];
   isOpen: boolean;
+  shippingOption: ShippingOption | null;
 
-  addItem:        (item: CartItem) => void;
-  removeItem:     (productId: string, size: string, color: string | null) => void;
-  updateQuantity: (productId: string, size: string, color: string | null, quantity: number) => void;
-  clearCart:      () => void;
-  openCart:       () => void;
-  closeCart:      () => void;
-  toggleCart:     () => void;
-  totalItems:     () => number;
-  totalPrice:     () => number;
-  weightTotal:    () => number;
+  addItem:           (item: CartItem) => void;
+  removeItem:        (productId: string, size: string, color: string | null) => void;
+  updateQuantity:    (productId: string, size: string, color: string | null, quantity: number) => void;
+  clearCart:         () => void;
+  openCart:          () => void;
+  closeCart:         () => void;
+  toggleCart:        () => void;
+  setShippingOption: (option: ShippingOption | null) => void;
+  totalItems:        () => number;
+  totalPrice:        () => number;
+  totalWithShipping: () => number;
+  weightTotal:       () => number;
 }
 
 function sameItem(a: CartItem, b: { product_id: string; size: string; color: string | null }) {
@@ -27,8 +30,9 @@ function sameItem(a: CartItem, b: { product_id: string; size: string; color: str
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
-      items:  [],
-      isOpen: false,
+      items:          [],
+      isOpen:         false,
+      shippingOption: null,
 
       addItem: (newItem) => {
         set((state) => {
@@ -67,20 +71,25 @@ export const useCartStore = create<CartStore>()(
         }));
       },
 
-      clearCart:  () => set({ items: [] }),
-      openCart:   () => set({ isOpen: true }),
-      closeCart:  () => set({ isOpen: false }),
-      toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
+      clearCart:         () => set({ items: [], shippingOption: null }),
+      openCart:          () => set({ isOpen: true }),
+      closeCart:         () => set({ isOpen: false }),
+      toggleCart:        () => set((state) => ({ isOpen: !state.isOpen })),
+      setShippingOption: (option) => set({ shippingOption: option }),
 
-      totalItems: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
-      totalPrice: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
-      // Peso total en gramos (fallback 200g por unidad si el producto no tiene peso cargado)
+      totalItems:  () => get().items.reduce((sum, i) => sum + i.quantity, 0),
+      totalPrice:  () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+      totalWithShipping: () => {
+        const base = get().items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+        return base + (get().shippingOption?.cost ?? 0);
+      },
+      // Peso total en gramos (fallback 200g si el producto no tiene peso cargado)
       weightTotal: () =>
         get().items.reduce((sum, i) => sum + (i.weight_g ?? 200) * i.quantity, 0),
     }),
     {
       name:       "vl-cart",
-      partialize: (state) => ({ items: state.items }),
+      partialize: (state) => ({ items: state.items, shippingOption: state.shippingOption }),
     }
   )
 );

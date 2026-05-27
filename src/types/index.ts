@@ -139,12 +139,11 @@ export interface CreateOrderResponse {
   transfer_info?: TransferInfo;
 }
 
-export interface EnvioOption {
-  carrier_id:   string;   // "andreani" | "correo-argentino" | "rosario" | "retiro_local"
-  carrier_name: string;   // label a mostrar, ej: "Andreani", "Correo Argentino"
-  days_label:   string;
-  cost:         number;   // ARS, ya con markup
-  service_id:   string;
+export interface ShippingOption {
+  type:       string;
+  label:      string;
+  days_label: string;
+  cost:       number;
 }
 
 export interface CartItem {

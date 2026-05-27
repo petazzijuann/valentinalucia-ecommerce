@@ -1,35 +1,17 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { formatARS } from "@/lib/utils";
-import { PROVINCES } from "@/data/argentina";
-import type { EnvioOption } from "@/types";
-
-type QuoteStatus = "idle" | "loading" | "done" | "error";
-
-const FIXED_OPTIONS = {
-  rosario: {
-    carrier_id:   "rosario",
-    carrier_name: "Envío en Rosario",
-    days_label:   "Coordinamos fecha de entrega",
-    cost:         3000,
-    service_id:   "rosario",
-  } satisfies EnvioOption,
-  retiro_local: {
-    carrier_id:   "retiro_local",
-    carrier_name: "Retiro en local",
-    days_label:   "España 1541 · Coordinamos horario por WhatsApp",
-    cost:         0,
-    service_id:   "retiro_local",
-  } satisfies EnvioOption,
-};
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, totalPrice, clearCart } = useCartStore();
+  const {
+    items, totalPrice, clearCart,
+    shippingOption, totalWithShipping,
+  } = useCartStore();
 
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
@@ -40,18 +22,9 @@ export default function CheckoutPage() {
     customer_phone: "",
     street:         "",
     city:           "",
-    province:       "",       // nombre para mostrar
-    province_code:  "",       // código corto para la API
+    province:       "",
     zip:            "",
   });
-
-  // Envío
-  const [selectedShipping, setSelectedShipping] = useState<EnvioOption | null>(null);
-  const [quoteStatus,       setQuoteStatus]      = useState<QuoteStatus>("idle");
-  const [quoteOptions,      setQuoteOptions]      = useState<EnvioOption[]>([]);
-  const [quoteError,        setQuoteError]        = useState("");
-
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   if (items.length === 0) {
     return (
@@ -64,80 +37,14 @@ export default function CheckoutPage() {
     );
   }
 
-  // Dispara cotización cuando hay ciudad + provincia + CP
-  const triggerQuote = useCallback((
-    city: string,
-    province_code: string,
-    zip: string
-  ) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!city.trim() || !province_code || !/^\d{4,5}$/.test(zip.trim())) return;
-
-    debounceRef.current = setTimeout(async () => {
-      setQuoteStatus("loading");
-      setQuoteError("");
-      setSelectedShipping(null);
-      setQuoteOptions([]);
-
-      try {
-        const res  = await fetch("/api/shipping/quote", {
-          method:  "POST",
-          headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({
-            cp_destino:    zip.trim(),
-            city_destino:  city.trim(),
-            state_destino: province_code,
-            cart_items:    items.map((i) => ({ product_id: i.product_id, qty: i.quantity })),
-            subtotal:      totalPrice(),
-          }),
-        });
-        const data = await res.json() as { options: EnvioOption[]; error?: string };
-
-        if (data.error || !data.options?.length) {
-          setQuoteError(data.error ?? "No pudimos cotizar el envío para esa dirección.");
-          setQuoteStatus("error");
-          return;
-        }
-
-        setQuoteOptions(data.options);
-        setSelectedShipping(data.options[0]);
-        setQuoteStatus("done");
-      } catch {
-        setQuoteError("No pudimos cotizar el envío. Intentá de nuevo.");
-        setQuoteStatus("error");
-      }
-    }, 600);
-  }, [items, totalPrice]);
-
   function setField(key: string, value: string) {
-    setForm((f) => {
-      const next = { ...f, [key]: value };
-      // Re-cotizar si ya hay suficientes datos
-      if (key === "city" || key === "zip") {
-        triggerQuote(
-          key === "city" ? value : next.city,
-          next.province_code,
-          key === "zip"  ? value : next.zip
-        );
-      }
-      return next;
-    });
-  }
-
-  function handleProvinceChange(name: string, code: string) {
-    setForm((f) => {
-      const next = { ...f, province: name, province_code: code };
-      triggerQuote(next.city, code, next.zip);
-      return next;
-    });
+    setForm((f) => ({ ...f, [key]: value }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
-
-    const shippingCost = selectedShipping?.cost ?? 0;
 
     const res = await fetch("/api/orders", {
       method:  "POST",
@@ -161,14 +68,11 @@ export default function CheckoutPage() {
           price:      i.price,
           ...(i.color && i.color !== "Único" ? { color: i.color } : {}),
         })),
-        payment_method:       "transfer",
-        shipping_method:      selectedShipping?.carrier_id      ?? null,
-        shipping_cost:        shippingCost > 0 ? shippingCost   : null,
-        shipping_cp:          form.zip || null,
-        shipping_days_label:  selectedShipping?.days_label      ?? null,
-        shipping_carrier:     selectedShipping?.carrier_id      ?? null,
-        shipping_carrier_name: selectedShipping?.carrier_name   ?? null,
-        shipping_service_id:  selectedShipping?.service_id      ?? null,
+        payment_method:      "transfer",
+        shipping_method:     shippingOption?.type      ?? null,
+        shipping_cost:       shippingOption?.cost      ?? null,
+        shipping_cp:         form.zip                  || null,
+        shipping_days_label: shippingOption?.days_label ?? null,
       }),
     });
 
@@ -188,11 +92,10 @@ export default function CheckoutPage() {
     }
   }
 
-  const inputClass  = "w-full border border-border px-4 py-3 text-sm focus:outline-none focus:border-brand-green transition-colors bg-background";
-  const labelClass  = "label-tag text-xs block mb-1.5";
-  const subtotal    = totalPrice();
-  const shippingCost = selectedShipping?.cost ?? 0;
-  const total       = subtotal + shippingCost;
+  const inputClass = "w-full border border-border px-4 py-3 text-sm focus:outline-none focus:border-brand-green transition-colors bg-background";
+  const labelClass = "label-tag text-xs block mb-1.5";
+  const subtotal   = totalPrice();
+  const total      = totalWithShipping();
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -232,40 +135,18 @@ export default function CheckoutPage() {
                 </div>
                 <div>
                   <label className={labelClass}>CIUDAD *</label>
-                  <input
-                    required
-                    value={form.city}
-                    onChange={(e) => setField("city", e.target.value)}
-                    className={inputClass}
-                    placeholder="Rosario"
-                  />
+                  <input required value={form.city} onChange={(e) => setField("city", e.target.value)} className={inputClass} placeholder="Rosario" />
                 </div>
                 <div>
                   <label className={labelClass}>PROVINCIA *</label>
-                  <select
-                    required
-                    value={form.province_code}
-                    onChange={(e) => {
-                      const opt = PROVINCES.find((p) => p.code === e.target.value);
-                      if (opt) handleProvinceChange(opt.name, opt.code);
-                    }}
-                    className={`${inputClass} cursor-pointer`}
-                  >
-                    <option value="">Seleccioná una provincia</option>
-                    {PROVINCES.map((p) => (
-                      <option key={p.code} value={p.code}>{p.name}</option>
-                    ))}
-                  </select>
+                  <input required value={form.province} onChange={(e) => setField("province", e.target.value)} className={inputClass} placeholder="Santa Fe" />
                 </div>
                 <div>
                   <label className={labelClass}>CÓDIGO POSTAL *</label>
                   <input
                     required
                     value={form.zip}
-                    onChange={(e) => {
-                      const v = e.target.value.replace(/\D/g, "");
-                      setField("zip", v);
-                    }}
+                    onChange={(e) => setField("zip", e.target.value.replace(/\D/g, ""))}
                     className={inputClass}
                     placeholder="2000"
                     maxLength={5}
@@ -275,89 +156,28 @@ export default function CheckoutPage() {
               </div>
             </section>
 
-            {/* Envío */}
+            {/* Envío seleccionado */}
             <section>
               <h2 className="font-bebas text-2xl mb-5">ENVÍO</h2>
-
-              {/* Opciones fijas (Rosario / Retiro) */}
-              <div className="flex flex-col gap-2 mb-4">
-                {(Object.values(FIXED_OPTIONS) as EnvioOption[]).map((opt) => {
-                  const sel = selectedShipping?.carrier_id === opt.carrier_id;
-                  return (
-                    <button
-                      key={opt.carrier_id}
-                      type="button"
-                      onClick={() => { setSelectedShipping(opt); setQuoteStatus("idle"); setQuoteOptions([]); }}
-                      className={`w-full text-left border p-3 transition-colors ${sel ? "border-brand-green bg-brand-green/5" : "border-border hover:border-brand-green/50"}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className={`w-3 h-3 rounded-full border-2 shrink-0 ${sel ? "border-brand-green bg-brand-green" : "border-border"}`} />
-                        <div className="flex-1 flex items-center justify-between">
-                          <p className="label-tag text-xs">{opt.carrier_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {opt.cost === 0 ? "Gratis" : formatARS(opt.cost)}
-                          </p>
-                        </div>
-                      </div>
-                      <p className="label-tag text-muted-foreground text-[10px] mt-1 ml-6">{opt.days_label}</p>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Cotización automática por domicilio */}
-              <div className="border border-border p-4">
-                <p className="label-tag text-xs mb-2 text-muted-foreground">
-                  ENVÍO A TODO EL PAÍS — completá ciudad, provincia y CP para cotizar automáticamente
-                </p>
-
-                {quoteStatus === "loading" && (
-                  <div className="flex flex-col gap-2 mt-3">
-                    <div className="h-14 bg-muted animate-pulse" />
-                    <div className="h-14 bg-muted animate-pulse" />
+              {shippingOption ? (
+                <div className="border border-brand-green bg-brand-green/5 p-4 flex items-start gap-3">
+                  <Check size={16} className="text-brand-green mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">{shippingOption.label}</p>
+                    <p className="label-tag text-muted-foreground text-[10px] mt-0.5">
+                      {shippingOption.days_label}
+                      {shippingOption.cost > 0 && ` · ${formatARS(shippingOption.cost)}`}
+                    </p>
                   </div>
-                )}
-
-                {quoteStatus === "error" && (
-                  <p className="text-red-600 text-xs label-tag mt-2">{quoteError}</p>
-                )}
-
-                {quoteStatus === "done" && quoteOptions.map((opt) => {
-                  const sel = selectedShipping?.carrier_id === opt.carrier_id;
-                  return (
-                    <button
-                      key={opt.carrier_id}
-                      type="button"
-                      onClick={() => setSelectedShipping(opt)}
-                      className={`w-full text-left border p-3 mt-2 transition-colors ${sel ? "border-brand-green bg-brand-green/5" : "border-border hover:border-brand-green/50"}`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className={`mt-0.5 w-3 h-3 rounded-full border-2 shrink-0 ${sel ? "border-brand-green bg-brand-green" : "border-border"}`} />
-                        <div className="flex-1">
-                          <p className="label-tag text-xs">{opt.carrier_name}</p>
-                          <div className="flex items-center justify-between mt-0.5">
-                            <p className="text-muted-foreground text-xs">{opt.days_label}</p>
-                            <p className="text-sm font-medium">{formatARS(opt.cost)}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-
-                {quoteStatus === "idle" && !form.province_code && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Seleccioná tu provincia para ver las opciones de envío.
-                  </p>
-                )}
-              </div>
-
-              {selectedShipping && (
-                <div className="mt-3 border border-brand-green bg-brand-green/5 p-3 flex items-center gap-3">
-                  <Check size={14} className="text-brand-green shrink-0" />
-                  <p className="label-tag text-xs">
-                    {selectedShipping.carrier_name} · {selectedShipping.days_label}
-                    {selectedShipping.cost > 0 ? ` · ${formatARS(selectedShipping.cost)}` : " · Gratis"}
+                </div>
+              ) : (
+                <div className="border border-border p-4">
+                  <p className="text-sm text-muted-foreground">
+                    No seleccionaste un método de envío.{" "}
+                    <a href="/carrito" className="text-brand-green hover:underline">
+                      Volvé al carrito
+                    </a>{" "}
+                    para elegir una opción.
                   </p>
                 </div>
               )}
@@ -401,17 +221,10 @@ export default function CheckoutPage() {
                 <span>{formatARS(subtotal)}</span>
               </div>
 
-              {selectedShipping && (
+              {shippingOption && (
                 <div className="flex items-center justify-between text-sm mb-3">
-                  <span className="text-muted-foreground">{selectedShipping.carrier_name}</span>
-                  <span>{selectedShipping.cost === 0 ? "Gratis" : formatARS(selectedShipping.cost)}</span>
-                </div>
-              )}
-
-              {!selectedShipping && (
-                <div className="flex items-center justify-between text-sm mb-3">
-                  <span className="text-muted-foreground">Envío</span>
-                  <span className="text-muted-foreground text-xs">A calcular</span>
+                  <span className="text-muted-foreground">{shippingOption.label}</span>
+                  <span>{shippingOption.cost === 0 ? "Gratis" : formatARS(shippingOption.cost)}</span>
                 </div>
               )}
 
