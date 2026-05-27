@@ -98,6 +98,7 @@ export default function AddToCartSection({
         color:      colorName,
         price:      product.price_sale,
         quantity,
+        weight_g:   product.weight_g ?? null,
       });
       openCart();
       setBtnStatus("done");

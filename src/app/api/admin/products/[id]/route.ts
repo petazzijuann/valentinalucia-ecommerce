@@ -21,6 +21,10 @@ const putSchema = z.object({
   tags:           z.array(z.string()),
   is_published:   z.boolean(),
   color_variants: z.array(colorVariantSchema).optional(),
+  weight_g:       z.number().int().positive().nullable().optional().default(null),
+  length_cm:      z.number().int().positive().nullable().optional().default(null),
+  width_cm:       z.number().int().positive().nullable().optional().default(null),
+  height_cm:      z.number().int().positive().nullable().optional().default(null),
 });
 
 export async function PATCH(
@@ -71,6 +75,10 @@ export async function PUT(
       stock:          parsed.data.stock as Record<string, number>,
       tags:           parsed.data.tags,
       is_published:   parsed.data.is_published,
+      weight_g:       parsed.data.weight_g  ?? null,
+      length_cm:      parsed.data.length_cm ?? null,
+      width_cm:       parsed.data.width_cm  ?? null,
+      height_cm:      parsed.data.height_cm ?? null,
       ...(parsed.data.color_variants !== undefined && {
         color_variants: parsed.data.color_variants,
       }),

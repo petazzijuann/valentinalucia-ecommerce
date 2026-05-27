@@ -35,6 +35,10 @@ export interface ProductPublic {
   price_sale: number;
   stock: StockMap;
   color_variants: ColorVariant[];
+  weight_g:   number | null;
+  length_cm:  number | null;
+  width_cm:   number | null;
+  height_cm:  number | null;
   is_published: boolean;
   created_at: string;
   updated_at: string;
@@ -151,4 +155,5 @@ export interface CartItem {
   color: string | null;
   price: number;
   quantity: number;
+  weight_g: number | null;
 }

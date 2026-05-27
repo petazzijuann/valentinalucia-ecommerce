@@ -57,6 +57,7 @@ async function getProducts(category?: string, size?: string, query?: string): Pr
         id: true, name: true, slug: true, description: true,
         category: true, images: true, tags: true,
         price_sale: true, stock: true, color_variants: true,
+        weight_g: true, length_cm: true, width_cm: true, height_cm: true,
         is_published: true, created_at: true, updated_at: true,
       },
       orderBy: { created_at: "desc" },
@@ -70,6 +71,10 @@ async function getProducts(category?: string, size?: string, query?: string): Pr
         created_at:     p.created_at.toISOString(),
         updated_at:     p.updated_at.toISOString(),
         color_variants: (p.color_variants as ColorVariant[] | null) ?? [],
+        weight_g:       p.weight_g  ?? null,
+        length_cm:      p.length_cm ?? null,
+        width_cm:       p.width_cm  ?? null,
+        height_cm:      p.height_cm ?? null,
       })) as ProductPublic[];
   } catch {
     return [];

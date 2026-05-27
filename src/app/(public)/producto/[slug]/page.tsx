@@ -62,6 +62,7 @@ export default async function ProductoPage({
       id: true, name: true, slug: true, description: true,
       category: true, images: true, tags: true,
       price_sale: true, stock: true, color_variants: true,
+      weight_g: true, length_cm: true, width_cm: true, height_cm: true,
       is_published: true, created_at: true, updated_at: true,
     },
   });

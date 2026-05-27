@@ -39,6 +39,11 @@ interface FormState {
   is_published:   boolean;
   // color variants — stock como string para los inputs
   color_variants: FormColorVariant[];
+  // dimensiones físicas (string para inputs, "" = null)
+  weight_g:   string;
+  length_cm:  string;
+  width_cm:   string;
+  height_cm:  string;
 }
 
 function toForm(p: ProductAdmin): FormState {
@@ -55,6 +60,10 @@ function toForm(p: ProductAdmin): FormState {
     stock:          Object.fromEntries(sizes.map((s) => [s, String(stock[s] ?? 0)])),
     tags:           p.tags.join(", "),
     is_published:   p.is_published,
+    weight_g:   p.weight_g  !== null ? String(p.weight_g)  : "",
+    length_cm:  p.length_cm !== null ? String(p.length_cm) : "",
+    width_cm:   p.width_cm  !== null ? String(p.width_cm)  : "",
+    height_cm:  p.height_cm !== null ? String(p.height_cm) : "",
     color_variants: colorVariants.map((cv): FormColorVariant => ({
       name:   cv.name,
       images: cv.images,
@@ -119,6 +128,12 @@ export default function EditProductSheet({ product, open, onOpenChange, onSaved 
       ? color_variants[0].stock
       : stock;
 
+    // Parsear dimensiones (vacío → null)
+    function parseDim(val: string): number | null {
+      const n = parseInt(val, 10);
+      return isNaN(n) || n <= 0 ? null : n;
+    }
+
     setSaving(true);
     setError(null);
 
@@ -134,6 +149,10 @@ export default function EditProductSheet({ product, open, onOpenChange, onSaved 
         stock:          legacyStock,
         tags,
         is_published:   form.is_published,
+        weight_g:       parseDim(form.weight_g),
+        length_cm:      parseDim(form.length_cm),
+        width_cm:       parseDim(form.width_cm),
+        height_cm:      parseDim(form.height_cm),
         ...(form.color_variants.length > 0 && { color_variants }),
       }),
     });
@@ -247,6 +266,67 @@ export default function EditProductSheet({ product, open, onOpenChange, onSaved 
                 className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-green transition-colors"
               />
             </div>
+          </div>
+
+          {/* Dimensiones del paquete */}
+          <div>
+            <label className="label-tag text-[10px] text-muted-foreground block mb-2">
+              DIMENSIONES DEL PAQUETE
+              <span className="ml-1 font-normal normal-case">(para cotización de envío)</span>
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="label-tag text-[9px] text-muted-foreground block mb-1">PESO (g)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={form.weight_g}
+                  onChange={(e) => setField("weight_g", e.target.value)}
+                  placeholder="200"
+                  className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-green transition-colors"
+                />
+              </div>
+              <div>
+                <label className="label-tag text-[9px] text-muted-foreground block mb-1">LARGO (cm)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={form.length_cm}
+                  onChange={(e) => setField("length_cm", e.target.value)}
+                  placeholder="30"
+                  className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-green transition-colors"
+                />
+              </div>
+              <div>
+                <label className="label-tag text-[9px] text-muted-foreground block mb-1">ANCHO (cm)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={form.width_cm}
+                  onChange={(e) => setField("width_cm", e.target.value)}
+                  placeholder="20"
+                  className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-green transition-colors"
+                />
+              </div>
+              <div>
+                <label className="label-tag text-[9px] text-muted-foreground block mb-1">ALTO (cm)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={form.height_cm}
+                  onChange={(e) => setField("height_cm", e.target.value)}
+                  placeholder="5"
+                  className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:border-brand-green transition-colors"
+                />
+              </div>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1.5">
+              Si quedan vacíos se usa el valor por defecto al cotizar el envío.
+            </p>
           </div>
 
           {/* Stock — simple si 1 color "Único", con tabs si multi-color */}

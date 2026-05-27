@@ -22,6 +22,7 @@ interface CartStore {
   totalItems: () => number;
   totalPrice: () => number;
   totalWithShipping: () => number;
+  weightTotal: () => number;
 }
 
 function sameItem(a: CartItem, b: { product_id: string; size: string; color: string | null }) {
@@ -87,6 +88,9 @@ export const useCartStore = create<CartStore>()(
         const base = get().items.reduce((sum, i) => sum + i.price * i.quantity, 0);
         return base + (get().shippingOption?.cost ?? 0);
       },
+      // Peso total del carrito en gramos (fallback 200g por item sin peso cargado)
+      weightTotal: () =>
+        get().items.reduce((sum, i) => sum + (i.weight_g ?? 200) * i.quantity, 0),
     }),
     {
       name: "vl-cart",
