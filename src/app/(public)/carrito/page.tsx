@@ -20,12 +20,6 @@ const SHIPPING_OPTIONS: ShippingOption[] = [
     days_label: "Coordinamos fecha de entrega",
     cost:       3000,
   },
-  {
-    type:       "nacional",
-    label:      "Envío a todo el país",
-    days_label: "Coordinamos transportista y costo por WhatsApp",
-    cost:       0,
-  },
 ];
 
 export default function CarritoPage() {
