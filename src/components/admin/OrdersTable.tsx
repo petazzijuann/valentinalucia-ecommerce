@@ -169,9 +169,10 @@ export default function OrdersTable() {
                 {order.shipping_method && (
                   <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 pt-1">
                     <span className="label-tag">
-                      {order.shipping_method === "rosario"      ? "Envío en Rosario"        :
-                       order.shipping_method === "retiro_local" ? "Retiro en local"          :
-                       order.shipping_method === "nacional"     ? "Envío a todo el país"     :
+                      {order.shipping_method === "rosario"           ? "Envío en Rosario"        :
+                       order.shipping_method === "retiro_local"      ? "Retiro en local"          :
+                       order.shipping_method === "nacional_sucursal" ? "Envío nacional · Sucursal" :
+                       order.shipping_method === "nacional_domicilio"? "Envío nacional · Domicilio":
                        order.shipping_method}
                       {order.shipping_days_label ? ` · ${order.shipping_days_label}` : ""}
                       {order.shipping_cost ? ` · ${formatARS(order.shipping_cost)}` : ""}

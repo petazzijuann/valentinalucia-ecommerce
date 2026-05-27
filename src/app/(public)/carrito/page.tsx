@@ -1,32 +1,52 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2, ArrowLeft } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { formatARS } from "@/lib/utils";
+import { buscarTarifa, calcularPrecio } from "@/data/envio-nacional";
 import type { ShippingOption } from "@/types";
 
-const SHIPPING_OPTIONS: ShippingOption[] = [
-  {
+type ShippingType = "retiro_local" | "rosario" | "nacional";
+
+const FIXED_OPTIONS: Record<"retiro_local" | "rosario", ShippingOption> = {
+  retiro_local: {
     type:       "retiro_local",
     label:      "Retiro en local",
     days_label: "España 1541, Rosario · Coordinamos horario por WhatsApp",
     cost:       0,
   },
-  {
+  rosario: {
     type:       "rosario",
     label:      "Envío en Rosario",
     days_label: "Coordinamos fecha de entrega",
     cost:       3000,
   },
-];
+};
 
 export default function CarritoPage() {
   const {
     items, removeItem, updateQuantity, totalPrice, clearCart,
-    shippingOption, setShippingOption, totalWithShipping,
+    shippingOption, setShippingOption, totalWithShipping, weightTotal,
   } = useCartStore();
+
+  const [selectedType, setSelectedType] = useState<ShippingType | null>(
+    shippingOption
+      ? (shippingOption.type === "rosario" || shippingOption.type === "retiro_local"
+          ? shippingOption.type
+          : "nacional")
+      : null
+  );
+  const [cpInput,   setCpInput]   = useState("");
+  const [cpBuscado, setCpBuscado] = useState("");
+
+  const pesoTotal = weightTotal();
+  const tarifa    = cpBuscado.length >= 4 ? buscarTarifa(cpBuscado) : null;
+
+  const precioSucursal  = tarifa ? calcularPrecio(tarifa.sucursal,  pesoTotal) : 0;
+  const precioDomicilio = tarifa ? calcularPrecio(tarifa.domicilio, pesoTotal) : 0;
 
   if (items.length === 0) {
     return (
@@ -40,8 +60,43 @@ export default function CarritoPage() {
     );
   }
 
+  function handleTypeSelect(type: ShippingType) {
+    setSelectedType(type);
+    if (type === "retiro_local" || type === "rosario") {
+      setShippingOption(FIXED_OPTIONS[type]);
+      setCpBuscado("");
+    } else {
+      // nacional: limpiar hasta que el usuario calcule
+      setShippingOption(null);
+    }
+  }
+
+  function handleBuscarCP() {
+    const cp = cpInput.trim();
+    if (!/^\d{4,5}$/.test(cp)) return;
+    setCpBuscado(cp);
+    setShippingOption(null); // limpiar selección anterior
+  }
+
+  function selectNacional(modo: "sucursal" | "domicilio") {
+    if (!tarifa) return;
+    const precio = modo === "sucursal" ? precioSucursal : precioDomicilio;
+    setShippingOption({
+      type:       `nacional_${modo}`,
+      label:      `Envío nacional · ${modo === "sucursal" ? "A sucursal" : "A domicilio"} (${tarifa.nombre})`,
+      days_label: modo === "sucursal" ? "Retirás en sucursal del transportista" : "Entrega en tu domicilio",
+      cost:       precio,
+    });
+  }
+
   const subtotal = totalPrice();
   const total    = totalWithShipping();
+
+  const TIPOS: { id: ShippingType; label: string; sub: string }[] = [
+    { id: "retiro_local", label: "Retiro en local",      sub: "Gratis · España 1541" },
+    { id: "rosario",      label: "Envío en Rosario",     sub: formatARS(3000) },
+    { id: "nacional",     label: "Envío a todo el país", sub: "Calculá por CP" },
+  ];
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -121,33 +176,26 @@ export default function CarritoPage() {
               <p className="text-sm">{formatARS(subtotal)}</p>
             </div>
 
-            {/* Selector de envío */}
-            <div className="mb-6">
+            {/* Selector de tipo de envío */}
+            <div className="mb-4">
               <p className="label-tag mb-3">ENVÍO</p>
               <div className="flex flex-col gap-2">
-                {SHIPPING_OPTIONS.map((opt) => {
-                  const active = shippingOption?.type === opt.type;
+                {TIPOS.map(({ id, label, sub }) => {
+                  const active = selectedType === id;
                   return (
                     <button
-                      key={opt.type}
+                      key={id}
                       type="button"
-                      onClick={() => setShippingOption(opt)}
+                      onClick={() => handleTypeSelect(id)}
                       className={`w-full text-left border p-3 transition-colors ${
                         active ? "border-brand-green bg-brand-green/5" : "border-border hover:border-brand-green/50"
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className={`w-3 h-3 rounded-full border-2 shrink-0 ${
-                          active ? "border-brand-green bg-brand-green" : "border-border"
-                        }`} />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="label-tag text-xs">{opt.label}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {opt.cost === 0 ? "Gratis" : formatARS(opt.cost)}
-                            </p>
-                          </div>
-                          <p className="label-tag text-muted-foreground text-[10px] mt-0.5">{opt.days_label}</p>
+                        <span className={`w-3 h-3 rounded-full border-2 shrink-0 ${active ? "border-brand-green bg-brand-green" : "border-border"}`} />
+                        <div className="flex-1 flex items-center justify-between">
+                          <p className="label-tag text-xs">{label}</p>
+                          <p className="text-xs text-muted-foreground">{sub}</p>
                         </div>
                       </div>
                     </button>
@@ -156,11 +204,104 @@ export default function CarritoPage() {
               </div>
             </div>
 
+            {/* Bloque envío nacional */}
+            {selectedType === "nacional" && (
+              <div className="mb-4">
+                {/* Input CP */}
+                <div className="flex gap-2 mb-3">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={5}
+                    value={cpInput}
+                    onChange={(e) => setCpInput(e.target.value.replace(/\D/g, ""))}
+                    onKeyDown={(e) => e.key === "Enter" && handleBuscarCP()}
+                    placeholder="Código postal"
+                    className="flex-1 border border-border px-3 py-2 text-sm focus:outline-none focus:border-brand-green transition-colors bg-background"
+                  />
+                  <button
+                    onClick={handleBuscarCP}
+                    disabled={cpInput.trim().length < 4}
+                    className="label-tag text-xs px-4 py-2 border border-brand-green text-brand-green hover:bg-brand-green hover:text-brand-cream transition-colors disabled:opacity-40"
+                  >
+                    CALCULAR
+                  </button>
+                </div>
+
+                {/* Sin cobertura */}
+                {cpBuscado && !tarifa && (
+                  <p className="text-xs text-muted-foreground label-tag">
+                    No tenemos tarifa para ese CP todavía. Consultanos por WhatsApp.
+                  </p>
+                )}
+
+                {/* Opciones de tarifa */}
+                {tarifa && (
+                  <div className="flex flex-col gap-2">
+                    <p className="label-tag text-[10px] text-muted-foreground mb-1">
+                      ZONA: {tarifa.nombre.toUpperCase()}
+                      {pesoTotal > 0 && <> · ~{Math.round(pesoTotal / 1000 * 10) / 10}kg</>}
+                    </p>
+
+                    {/* A sucursal */}
+                    {(() => {
+                      const sel = shippingOption?.type === "nacional_sucursal";
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => selectNacional("sucursal")}
+                          className={`w-full text-left border p-3 transition-colors ${sel ? "border-brand-green bg-brand-green/5" : "border-border hover:border-brand-green/50"}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className={`mt-0.5 w-3 h-3 rounded-full border-2 shrink-0 ${sel ? "border-brand-green bg-brand-green" : "border-border"}`} />
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <p className="label-tag text-xs">A sucursal</p>
+                                <p className="text-sm font-medium">{formatARS(precioSucursal)}</p>
+                              </div>
+                              <p className="text-muted-foreground text-[10px] mt-0.5">Retirás en la sucursal del transportista</p>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })()}
+
+                    {/* A domicilio */}
+                    {(() => {
+                      const sel = shippingOption?.type === "nacional_domicilio";
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => selectNacional("domicilio")}
+                          className={`w-full text-left border p-3 transition-colors ${sel ? "border-brand-green bg-brand-green/5" : "border-border hover:border-brand-green/50"}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className={`mt-0.5 w-3 h-3 rounded-full border-2 shrink-0 ${sel ? "border-brand-green bg-brand-green" : "border-border"}`} />
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <p className="label-tag text-xs">A domicilio</p>
+                                <p className="text-sm font-medium">{formatARS(precioDomicilio)}</p>
+                              </div>
+                              <p className="text-muted-foreground text-[10px] mt-0.5">Entrega en tu puerta</p>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })()}
+
+                    <p className="label-tag text-[10px] text-muted-foreground mt-1">
+                      * Precio aproximado. Puede variar según el peso y embalaje final.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Total */}
             <div className="border-t border-border pt-4 mb-6">
               {shippingOption && (
                 <div className="flex items-center justify-between mb-2 text-sm text-muted-foreground">
-                  <span>{shippingOption.label}</span>
+                  <span className="text-xs">{shippingOption.label}</span>
                   <span>{shippingOption.cost === 0 ? "Gratis" : formatARS(shippingOption.cost)}</span>
                 </div>
               )}
