@@ -92,9 +92,10 @@ bot.on("callback_query", async (ctx) => {
     return handleUploadCallback(ctx);
   }
   if (
-    data.startsWith("product:") ||
-    data.startsWith("size:")    ||
-    data.startsWith("pay:")     ||
+    data.startsWith("product:")   ||
+    data.startsWith("salecolor:") ||
+    data.startsWith("size:")      ||
+    data.startsWith("pay:")       ||
     data.startsWith("sale:")
   ) {
     return handleSaleCallback(ctx);
