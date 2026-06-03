@@ -16,6 +16,11 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
 
+  const [coupon,        setCoupon]        = useState<{ code: string; type: string; value: number | null; discount_amount: number } | null>(null);
+  const [couponInput,   setCouponInput]   = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError,   setCouponError]   = useState("");
+
   const [form, setForm] = useState({
     customer_name:  "",
     customer_email: "",
@@ -69,10 +74,11 @@ export default function CheckoutPage() {
           ...(i.color && i.color !== "Único" ? { color: i.color } : {}),
         })),
         payment_method:      "transfer",
-        shipping_method:     shippingOption?.type      ?? null,
-        shipping_cost:       shippingOption?.cost      ?? null,
-        shipping_cp:         form.zip                  || null,
-        shipping_days_label: shippingOption?.days_label ?? null,
+        shipping_method:     shippingOption?.type       ?? null,
+        shipping_cost:       shippingCost > 0 ? shippingCost : null,
+        shipping_cp:         form.zip                   || null,
+        shipping_days_label: shippingOption?.days_label  ?? null,
+        ...(coupon && { coupon_code: coupon.code, discount_amount: coupon.discount_amount }),
       }),
     });
 
@@ -92,10 +98,43 @@ export default function CheckoutPage() {
     }
   }
 
+  async function handleApplyCoupon() {
+    if (!couponInput.trim()) return;
+    setCouponLoading(true);
+    setCouponError("");
+    try {
+      const res  = await fetch("/api/coupons/validate", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ code: couponInput.toUpperCase(), subtotal: totalPrice() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        const msg =
+          data.error === "not_found"    ? "Cupón no encontrado" :
+          data.error === "inactive"     ? "Este cupón ya no está disponible" :
+          data.error === "out_of_stock" ? "Este cupón ya no está disponible" :
+          data.error === "expired"      ? "Este cupón ya no está disponible" :
+          data.error === "min_purchase" ? `Este cupón requiere una compra mínima de ${formatARS(data.min)}` :
+          "No pudimos validar el cupón, intentá de nuevo";
+        setCouponError(msg);
+      } else {
+        setCoupon(data);
+        setCouponInput("");
+      }
+    } catch {
+      setCouponError("No pudimos validar el cupón, intentá de nuevo");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
   const inputClass = "w-full border border-border px-4 py-3 text-sm focus:outline-none focus:border-brand-green transition-colors bg-background";
   const labelClass = "label-tag text-xs block mb-1.5";
   const subtotal   = totalPrice();
-  const total      = totalWithShipping();
+  const discountOnSubtotal = coupon ? coupon.discount_amount : 0;
+  const shippingCost       = coupon?.type === "free_shipping" ? 0 : (shippingOption?.cost ?? 0);
+  const total              = subtotal - discountOnSubtotal + shippingCost;
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -221,12 +260,65 @@ export default function CheckoutPage() {
                 <span>{formatARS(subtotal)}</span>
               </div>
 
-              {shippingOption && (
-                <div className="flex items-center justify-between text-sm mb-3">
-                  <span className="text-muted-foreground">{shippingOption.label}</span>
-                  <span>{shippingOption.cost === 0 ? "Gratis" : formatARS(shippingOption.cost)}</span>
+              {coupon && coupon.type !== "free_shipping" && (
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-muted-foreground">
+                    Descuento{coupon.type === "percent" ? ` −${coupon.value}%` : ""}
+                  </span>
+                  <span className="text-brand-green">−{formatARS(coupon.discount_amount)}</span>
                 </div>
               )}
+
+              {shippingOption && (
+                <div className="flex items-center justify-between text-sm mb-3">
+                  <span className="text-muted-foreground">
+                    {shippingOption.label}
+                    {coupon?.type === "free_shipping" ? " (gratis)" : ""}
+                  </span>
+                  <span>{shippingCost === 0 ? "Gratis" : formatARS(shippingCost)}</span>
+                </div>
+              )}
+
+              {/* Cupón */}
+              <div className="mb-4">
+                {coupon ? (
+                  <div className="flex items-center justify-between text-sm py-2 px-3 bg-brand-green/5 border border-brand-green/30">
+                    <span className="label-tag text-[10px] text-brand-green">✓ {coupon.code} aplicado</span>
+                    <button
+                      type="button"
+                      onClick={() => { setCoupon(null); setCouponInput(""); setCouponError(""); }}
+                      className="label-tag text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Quitar
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="label-tag text-[10px] text-muted-foreground mb-2">¿Tenés un cupón?</p>
+                    <div className="flex gap-2">
+                      <input
+                        value={couponInput}
+                        onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(""); }}
+                        onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                        placeholder="CÓDIGO DE CUPÓN"
+                        disabled={couponLoading}
+                        className="flex-1 border border-border bg-background px-3 py-2 text-xs outline-none focus:border-brand-green transition-colors disabled:opacity-50 placeholder:text-muted-foreground/60"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        disabled={couponLoading || !couponInput.trim()}
+                        className="label-tag text-[10px] px-3 py-2 bg-brand-green text-brand-cream hover:bg-green-mid transition-colors disabled:opacity-50 shrink-0"
+                      >
+                        {couponLoading ? "..." : "APLICAR"}
+                      </button>
+                    </div>
+                    {couponError && (
+                      <p className="label-tag text-xs text-red-600 mt-1.5">{couponError}</p>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <div className="border-t border-border pt-3 flex items-center justify-between mb-6">
                 <p className="label-tag">TOTAL</p>

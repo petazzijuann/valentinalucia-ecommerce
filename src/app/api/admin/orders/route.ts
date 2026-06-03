@@ -9,10 +9,11 @@ export async function GET() {
 
   const serialized = orders.map((o) => ({
     ...o,
-    total_amount:  Number(o.total_amount),
-    shipping_cost: o.shipping_cost ? Number(o.shipping_cost) : null,
-    created_at:    o.created_at.toISOString(),
-    updated_at:    o.updated_at.toISOString(),
+    total_amount:    Number(o.total_amount),
+    shipping_cost:   o.shipping_cost    ? Number(o.shipping_cost)    : null,
+    discount_amount: o.discount_amount  ? Number(o.discount_amount)  : null,
+    created_at:      o.created_at.toISOString(),
+    updated_at:      o.updated_at.toISOString(),
   }));
 
   return NextResponse.json(serialized);

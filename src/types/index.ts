@@ -78,8 +78,33 @@ export interface OrderPublic {
   payment_method: PaymentMethod;
   payment_proof_url: string | null;
   astropay_payment_id: string | null;
+  coupon_code: string | null;
+  discount_amount: number | null;
   created_at: string;
   updated_at: string;
+}
+
+export type CouponType = "percent" | "fixed" | "free_shipping";
+
+export interface CouponPublic {
+  code:            string;
+  type:            CouponType;
+  value:           number | null;
+  discount_amount: number;
+}
+
+export interface CouponAdmin {
+  id:           string;
+  code:         string;
+  type:         CouponType;
+  value:        number | null;
+  stock:        number;
+  used_count:   number;
+  min_purchase: number | null;
+  is_active:    boolean;
+  expires_at:   string | null;
+  created_at:   string;
+  updated_at:   string;
 }
 
 export interface SaleRecord {

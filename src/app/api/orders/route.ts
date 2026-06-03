@@ -33,6 +33,10 @@ const orderSchema = z.object({
   shipping_carrier:      z.string().nullable().optional(),
   shipping_carrier_name: z.string().nullable().optional(),
   shipping_service_id:   z.string().nullable().optional(),
+
+  // Cupón (opcionales)
+  coupon_code:     z.string().optional(),
+  discount_amount: z.number().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -42,10 +46,48 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const data          = parsed.data;
-  const subtotal      = data.items.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const shippingCost  = data.shipping_cost ?? 0;
-  const total         = subtotal + shippingCost;
+  const data     = parsed.data;
+  const subtotal = data.items.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+  // Validar y aplicar cupón server-side
+  let discountAmount = 0;
+  let appliedCouponCode: string | null = null;
+  let appliedCouponType: string | null = null;
+
+  if (data.coupon_code) {
+    const code   = data.coupon_code.toUpperCase();
+    const coupon = await prisma.coupon.findUnique({ where: { code } });
+
+    if (
+      coupon &&
+      coupon.is_active &&
+      coupon.stock > 0 &&
+      !(coupon.expires_at && coupon.expires_at < new Date()) &&
+      !(coupon.min_purchase && subtotal < Number(coupon.min_purchase))
+    ) {
+      if (coupon.type === "percent" && coupon.value) {
+        discountAmount = Math.floor(subtotal * Number(coupon.value) / 100);
+      } else if (coupon.type === "fixed" && coupon.value) {
+        discountAmount = Math.min(Number(coupon.value), subtotal);
+      }
+
+      const updated = await prisma.coupon.updateMany({
+        where: { id: coupon.id, stock: { gt: 0 } },
+        data:  { stock: { decrement: 1 }, used_count: { increment: 1 } },
+      });
+
+      if (updated.count > 0) {
+        appliedCouponCode = coupon.code;
+        appliedCouponType = coupon.type;
+      } else {
+        // Race condition: stock se agotó entre la validación y el pedido
+        discountAmount = 0;
+      }
+    }
+  }
+
+  const shippingCost = (appliedCouponType === "free_shipping") ? 0 : (data.shipping_cost ?? 0);
+  const total        = subtotal - discountAmount + shippingCost;
 
   const order = await prisma.order.create({
     data: {
@@ -65,6 +107,9 @@ export async function POST(request: NextRequest) {
       shipping_carrier:      data.shipping_carrier      ?? null,
       shipping_carrier_name: data.shipping_carrier_name ?? null,
       shipping_service_id:   data.shipping_service_id   ?? null,
+
+      coupon_code:     appliedCouponCode,
+      discount_amount: discountAmount > 0 ? discountAmount : null,
     },
   });
 
