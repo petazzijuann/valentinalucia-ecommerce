@@ -135,3 +135,57 @@ model TelegramSession {
 
   @@map("telegram_sessions")
 }
+
+// ── Prode (fase de grupos) ──────────────────────────────────
+
+model ProdePlayer {
+  id            String    @id @default(uuid())
+  instagram     String    @unique
+  email         String    @unique
+  password_hash String
+  total_points  Int       @default(0)
+  submitted_at  DateTime?
+  created_at    DateTime  @default(now())
+
+  predictions ProdeMatchPrediction[]
+
+  @@map("prode_players")
+}
+
+model ProdeMatch {
+  id         String  @id @default(uuid())
+  code       String  @unique // "A1".."L6"
+  group      String
+  home_team  String // código de equipo (ISO2)
+  away_team  String
+  home_score Int?
+  away_score Int?
+  finished   Boolean @default(false)
+
+  predictions ProdeMatchPrediction[]
+
+  @@map("prode_matches")
+}
+
+model ProdeMatchPrediction {
+  id         String @id @default(uuid())
+  player_id  String
+  match_id   String
+  home_score Int
+  away_score Int
+  points     Int    @default(0)
+
+  player ProdePlayer @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  match  ProdeMatch  @relation(fields: [match_id], references: [id], onDelete: Cascade)
+
+  @@unique([player_id, match_id])
+  @@map("prode_match_predictions")
+}
+
+model ProdeSettings {
+  id                 String   @id @default("main")
+  predictions_locked Boolean  @default(false)
+  updated_at         DateTime @updatedAt
+
+  @@map("prode_settings")
+}

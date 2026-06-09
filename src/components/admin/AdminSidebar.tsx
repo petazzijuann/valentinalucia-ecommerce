@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, LogOut, Inbox, Mail, Tag } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, LogOut, Inbox, Mail, Tag, Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const NAV = [
@@ -10,6 +10,7 @@ const NAV = [
   { href: "/admin/pedidos",      label: "PEDIDOS",      icon: Inbox },
   { href: "/admin/productos",    label: "PRODUCTOS",    icon: Package },
   { href: "/admin/cupones",      label: "CUPONES",      icon: Tag },
+  { href: "/admin/prode",        label: "PRODE",        icon: Trophy },
   { href: "/admin/ventas",       label: "VENTAS",       icon: ShoppingCart },
   { href: "/admin/reportes",     label: "REPORTES",     icon: BarChart3 },
   { href: "/admin/suscriptores", label: "SUSCRIPTORES", icon: Mail },
