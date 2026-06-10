@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import useSWR from "swr";
 import { formatARS } from "@/lib/utils";
 import type { OrderItem } from "@/types";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
+
+type AdminOrderItem = OrderItem & { image?: string | null };
 
 interface CustomerAddress {
   street:   string;
@@ -19,7 +23,7 @@ interface AdminOrder {
   customer_email:   string;
   customer_phone:   string;
   customer_address: CustomerAddress;
-  items: OrderItem[];
+  items: AdminOrderItem[];
   total_amount: number;
   payment_method: string;
   status: string;
@@ -51,6 +55,16 @@ export default function OrdersTable() {
   const [deleteOpen,  setDeleteOpen]  = useState(false);
   const [deleting,    setDeleting]    = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
+  const [lightbox, setLightbox] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setLightbox(null);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [lightbox]);
 
   function showToast(msg: string, type: "ok" | "err") {
     setToast({ msg, type });
@@ -121,7 +135,7 @@ export default function OrdersTable() {
             const status = STATUS_LABEL[order.status] ?? { label: order.status, cls: "bg-muted text-muted-foreground" };
             const isPending = order.status === "pending_payment";
             const isDeletable = DELETABLE.includes(order.status);
-            const items = order.items as unknown as OrderItem[];
+            const items = order.items;
 
             return (
               <div key={order.id} className="border border-border p-5 flex flex-col gap-3">
@@ -159,10 +173,44 @@ export default function OrdersTable() {
                   <p className="price-text text-lg shrink-0">{formatARS(order.total_amount)}</p>
                 </div>
 
-                <ul className="text-sm text-muted-foreground flex flex-col gap-1">
+                <ul className="flex flex-col gap-2">
                   {items.map((item, i) => (
-                    <li key={i}>
-                      {item.name} ({item.size}) ×{item.qty} — {formatARS(item.price * item.qty)}
+                    <li key={i} className="flex items-center gap-3 text-sm">
+                      {/* Thumbnail / placeholder */}
+                      {item.image ? (
+                        <button
+                          type="button"
+                          onClick={() => setLightbox(item.image!)}
+                          className="relative w-12 h-14 shrink-0 overflow-hidden border border-border bg-muted hover:opacity-80 transition-opacity cursor-zoom-in"
+                          title="Ver foto"
+                        >
+                          <Image src={item.image} alt={item.name} fill sizes="48px" className="object-cover" />
+                        </button>
+                      ) : (
+                        <span className="w-12 h-14 shrink-0 grid place-items-center border border-border bg-muted text-muted-foreground label-tag text-[8px] text-center leading-tight">
+                          SIN<br />FOTO
+                        </span>
+                      )}
+
+                      {/* Detalle */}
+                      <div className="min-w-0">
+                        {item.slug ? (
+                          <Link
+                            href={`/producto/${item.slug}`}
+                            target="_blank"
+                            className="font-medium text-foreground hover:text-brand-green hover:underline"
+                          >
+                            {item.name}
+                          </Link>
+                        ) : (
+                          <span className="font-medium text-foreground">{item.name}</span>
+                        )}
+                        <p className="text-muted-foreground text-xs mt-0.5">
+                          Talle {item.size}
+                          {item.color && item.color !== "Único" ? ` · ${item.color.toUpperCase()}` : ""}
+                          {" · "}×{item.qty} — {formatARS(item.price * item.qty)}
+                        </p>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -233,6 +281,31 @@ export default function OrdersTable() {
           })
         )}
       </div>
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightbox(null)}
+            aria-label="Cerrar"
+            className="absolute top-4 right-5 text-white/80 hover:text-white text-3xl leading-none"
+          >
+            ✕
+          </button>
+          <Image
+            src={lightbox}
+            alt="Foto del producto"
+            width={1200}
+            height={1200}
+            onClick={(e) => e.stopPropagation()}
+            className="h-auto w-auto max-h-[85vh] max-w-[90vw] object-contain"
+          />
+        </div>
+      )}
 
       <DeleteConfirmDialog
         open={deleteOpen}

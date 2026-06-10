@@ -72,6 +72,7 @@ export default function CheckoutPage() {
           qty:        i.quantity,
           price:      i.price,
           ...(i.color && i.color !== "Único" ? { color: i.color } : {}),
+          ...(i.image ? { image: i.image } : {}),
         })),
         payment_method:      "transfer",
         shipping_method:     shippingOption?.type       ?? null,

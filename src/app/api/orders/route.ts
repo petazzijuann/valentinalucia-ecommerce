@@ -22,6 +22,8 @@ const orderSchema = z.object({
     size:       z.string(),
     qty:        z.number().int().positive(),
     price:      z.number().positive(),
+    color:      z.string().nullable().optional(),
+    image:      z.string().nullable().optional(),
   })).min(1),
   payment_method: z.enum(["astropay", "transfer"]),
 

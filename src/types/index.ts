@@ -57,6 +57,7 @@ export interface OrderItem {
   qty: number;
   price: number;
   color?: string | null;
+  image?: string | null;
 }
 
 export interface CustomerAddress {
