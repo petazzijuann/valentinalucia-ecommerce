@@ -123,11 +123,24 @@ export interface SaleRecord {
   created_at: string;
 }
 
+export interface ExpenseAdmin {
+  id:          string;
+  description: string;
+  amount:      number;
+  date:        string;
+  category:    string | null;
+  notes:       string | null;
+  created_at:  string;
+  updated_at:  string;
+}
+
 export interface DashboardMetrics {
   period: "today" | "week" | "month" | "all";
   revenue: number;
   cogs: number;
   profit: number;
+  expenses_total: number;
+  net_profit: number;
   margin_avg: number;
   sales_count: number;
   stock_value_cost: number;
