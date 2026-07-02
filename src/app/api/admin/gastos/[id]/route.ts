@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
+import { requireAdmin } from "@/lib/auth/admin";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { id } = await params;
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Cuerpo inválido" }, { status: 400 });
+  }
   const { description, amount, date, category, notes } = body;
 
   if (description !== undefined && !description?.trim()) {
@@ -46,6 +53,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { id } = await params;
   await prisma.expense.delete({ where: { id } });
   return new NextResponse(null, { status: 204 });

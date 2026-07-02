@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
+import { requireAdmin } from "@/lib/auth/admin";
 
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const products = await prisma.product.findMany({
     orderBy: { created_at: "desc" },
   });

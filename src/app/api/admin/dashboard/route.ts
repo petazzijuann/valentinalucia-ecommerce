@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
+import { requireAdmin } from "@/lib/auth/admin";
 import type { DashboardMetrics, StockMap, ColorVariant } from "@/types";
 
 /** Suma todas las unidades en stock de un producto, considerando todos los colores. */
@@ -39,6 +40,9 @@ function startOf(unit: "today" | "week" | "month"): Date {
 }
 
 export async function GET(request: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const rawPeriod = request.nextUrl.searchParams.get("period") ?? "month";
   const period = (["today", "week", "month", "all"].includes(rawPeriod)
     ? rawPeriod

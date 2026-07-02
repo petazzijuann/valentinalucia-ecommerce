@@ -10,7 +10,13 @@ import { prisma } from "@/lib/prisma/client";
 const COOKIE_NAME = "prode_session";
 
 function getSecret(): string {
-  return process.env.PRODE_SESSION_SECRET ?? "dev-insecure-prode-secret";
+  const secret = process.env.PRODE_SESSION_SECRET;
+  if (secret) return secret;
+  // En producción, un secreto conocido permitiría falsificar cookies de sesión.
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("PRODE_SESSION_SECRET no está configurado");
+  }
+  return "dev-insecure-prode-secret";
 }
 
 // ── Password hashing (scrypt, formato "salt:hash") ──────────────

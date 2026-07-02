@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma/client";
+import { requireAdmin } from "@/lib/auth/admin";
 import { fulfillOrder, releaseStock } from "@/lib/orders/fulfill";
 
 const schema = z.object({
@@ -11,6 +12,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { id } = await params;
   const body = await request.json().catch(() => null);
   const parsed = schema.safeParse(body);
@@ -31,6 +35,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { id } = await params;
 
   const order = await prisma.order.findUnique({ where: { id } });

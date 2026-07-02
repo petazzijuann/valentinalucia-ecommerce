@@ -3,8 +3,12 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma/client";
 import { getProdeSettings } from "@/lib/prode/settings";
 import { recalcAll } from "@/lib/prode/scoring";
+import { requireAdmin } from "@/lib/auth/admin";
 
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const [matches, settings, playerCount] = await Promise.all([
     prisma.prodeMatch.findMany({ orderBy: { code: "asc" } }),
     getProdeSettings(),
@@ -31,6 +35,9 @@ const postSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const body = await request.json().catch(() => null);
   const parsed = postSchema.safeParse(body);
   if (!parsed.success) {

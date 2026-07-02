@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
+import { requireAdmin } from "@/lib/auth/admin";
 
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const expenses = await prisma.expense.findMany({
     orderBy: { date: "desc" },
   });
@@ -21,7 +25,13 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Cuerpo inválido" }, { status: 400 });
+  }
   const { description, amount, date, category, notes } = body;
 
   if (!description?.trim()) {

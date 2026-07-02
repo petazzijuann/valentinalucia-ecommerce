@@ -1,23 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-
-async function isAuthenticated(): Promise<boolean> {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
-  );
-  const { data: { user } } = await supabase.auth.getUser();
-  return !!user;
-}
+import { requireAdmin } from "@/lib/auth/admin";
 
 export async function GET(request: NextRequest) {
-  if (!(await isAuthenticated())) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
   const format = request.nextUrl.searchParams.get("format");
 
@@ -26,8 +13,12 @@ export async function GET(request: NextRequest) {
   });
 
   if (format === "csv") {
+    // Neutraliza inyección de fórmulas: emails que empiezan con = + - @ podrían
+    // ejecutarse como fórmula en Excel/Sheets.
+    const csvCell = (v: string) =>
+      `"${(/^[=+\-@\t\r]/.test(v) ? "'" + v : v).replace(/"/g, '""')}"`;
     const rows = subscribers.map((s) =>
-      `${s.email},${s.created_at.toISOString().slice(0, 10)}`
+      `${csvCell(s.email)},${s.created_at.toISOString().slice(0, 10)}`
     );
     const csv = ["email,fecha", ...rows].join("\n");
     const date = new Date().toISOString().slice(0, 10);

@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
+import { requireAdmin } from "@/lib/auth/admin";
 import type { OrderItem, ColorVariant } from "@/types";
 
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const orders = await prisma.order.findMany({
     orderBy: { created_at: "desc" },
     take: 200,

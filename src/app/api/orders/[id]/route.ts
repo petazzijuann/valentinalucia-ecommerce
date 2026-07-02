@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
+import { requireAdmin } from "@/lib/auth/admin";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Expone PII del cliente (email, teléfono, dirección): solo admin.
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { id } = await params;
 
   const order = await prisma.order.findUnique({ where: { id } });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma/client";
+import { requireAdmin } from "@/lib/auth/admin";
 
 const couponSchema = z.object({
   code:         z.string().min(1).regex(/^[A-Z0-9]+$/, "Solo letras y números"),
@@ -24,6 +25,9 @@ const couponSchema = z.object({
 });
 
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const coupons = await prisma.coupon.findMany({
     orderBy: { created_at: "desc" },
   });
@@ -41,6 +45,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const body = await request.json().catch(() => null);
   const parsed = couponSchema.safeParse(body);
   if (!parsed.success) {

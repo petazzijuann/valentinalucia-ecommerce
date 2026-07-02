@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
+import { requireAdmin } from "@/lib/auth/admin";
 
 const stockSchema = z.record(z.string(), z.number().min(0));
 
@@ -31,6 +32,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { id } = await params;
   const body = await request.json();
 
@@ -53,6 +57,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { id } = await params;
   const body = await request.json().catch(() => null);
   const parsed = putSchema.safeParse(body);
@@ -95,6 +102,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { id } = await params;
 
   const existing = await prisma.product.findUnique({ where: { id } });

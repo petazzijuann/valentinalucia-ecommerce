@@ -1,7 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
+import { requireAdmin } from "@/lib/auth/admin";
+
+/**
+ * Neutraliza inyección de fórmulas en CSV: valores que empiezan con = + - @
+ * (o tab/CR) pueden ejecutarse como fórmula al abrir el archivo en Excel/Sheets.
+ * Se antepone un apóstrofo y se escapan comillas dobles.
+ */
+function csvCell(value: string): string {
+  let v = value ?? "";
+  if (/^[=+\-@\t\r]/.test(v)) v = "'" + v;
+  return `"${v.replace(/"/g, '""')}"`;
+}
 
 export async function GET(request: NextRequest) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { searchParams } = request.nextUrl;
   const format = searchParams.get("format");
   const limit  = parseInt(searchParams.get("limit") ?? "100");
@@ -38,15 +53,15 @@ export async function GET(request: NextRequest) {
       [
         s.id,
         s.created_at.slice(0, 10),
-        `"${s.product_name.replace(/"/g, '""')}"`,
-        s.size,
+        csvCell(s.product_name),
+        csvCell(s.size),
         s.quantity,
         s.sale_price,
         s.cost_price,
-        s.channel,
-        s.payment_method,
-        `"${(s.customer_name ?? "").replace(/"/g, '""')}"`,
-        s.customer_email ?? "",
+        csvCell(s.channel),
+        csvCell(s.payment_method),
+        csvCell(s.customer_name ?? ""),
+        csvCell(s.customer_email ?? ""),
       ].join(",")
     );
     const csv = [header, ...rows].join("\n");
