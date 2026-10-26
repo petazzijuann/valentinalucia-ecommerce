@@ -6,7 +6,7 @@ import type { ProductAdmin, StockMap, ColorVariant } from "@/types";
 
 const SIZES_DEFAULT  = ["XS", "S", "M", "L", "XL", "XXL"] as const;
 const SIZES_PANTALON = ["36", "38", "40", "42", "44", "46"] as const;
-const CATEGORIES     = ["remeras", "pantalones", "buzos", "accesorios", "calzado"] as const;
+const CATEGORIES     = ["remeras", "pantalones", "buzos", "vestidos", "accesorios", "calzado"] as const;
 
 function getFormSizes(category: string): string[] {
   return category === "pantalones"

@@ -6,7 +6,7 @@ import { getSession, setSession, clearSession } from "../state";
 import { formatARS } from "@/lib/utils";
 import type { ColorVariant } from "@/types";
 
-const CATEGORIES = ["remeras", "pantalones", "buzos", "accesorios", "calzado"];
+const CATEGORIES = ["remeras", "pantalones", "buzos", "vestidos", "accesorios", "calzado"];
 
 const CATEGORY_KEYBOARD = {
   inline_keyboard: [
@@ -18,7 +18,10 @@ const CATEGORY_KEYBOARD = {
       { text: "🧥 Buzos",      callback_data: "cat:buzos" },
       { text: "👜 Accesorios", callback_data: "cat:accesorios" },
     ],
-    [{ text: "👟 Calzado", callback_data: "cat:calzado" }],
+    [
+      { text: "👗 Vestidos",   callback_data: "cat:vestidos" },
+      { text: "👟 Calzado",    callback_data: "cat:calzado" },
+    ],
   ],
 };
 

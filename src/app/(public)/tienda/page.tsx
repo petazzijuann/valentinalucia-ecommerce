@@ -19,6 +19,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   remeras:    "Remeras",
   pantalones: "Pantalones",
   buzos:      "Buzos",
+  vestidos:   "Vestidos",
   accesorios: "Accesorios",
 };
 
@@ -35,7 +36,7 @@ export async function generateMetadata({
     title: catLabel ?? "Tienda",
     description: catLabel
       ? `Comprá ${catLabel.toLowerCase()} VALENTINA LUCIA. Indumentaria urbano-elegante argentina.`
-      : "Explorá la colección completa VALENTINA LUCIA. Remeras, pantalones, buzos, accesorios y calzado.",
+      : "Explorá la colección completa VALENTINA LUCIA. Remeras, pantalones, buzos, vestidos, accesorios y calzado.",
   };
 }
 

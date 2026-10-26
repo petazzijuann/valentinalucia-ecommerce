@@ -29,6 +29,9 @@ export default function Footer() {
               <Link href="/tienda?categoria=buzos" className="hover:text-brand-cream transition-colors">
                 Buzos
               </Link>
+              <Link href="/tienda?categoria=vestidos" className="hover:text-brand-cream transition-colors">
+                Vestidos
+              </Link>
             </div>
           </div>
 
