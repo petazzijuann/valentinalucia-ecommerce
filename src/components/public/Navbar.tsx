@@ -11,6 +11,7 @@ const CATEGORIAS = [
   { value: "remeras",    label: "REMERAS" },
   { value: "pantalones", label: "PANTALONES" },
   { value: "buzos",      label: "BUZOS" },
+  { value: "vestidos",   label: "VESTIDOS" },
   { value: "accesorios", label: "ACCESORIOS" },
 ] as const;
 

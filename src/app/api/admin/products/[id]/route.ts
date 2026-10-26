@@ -14,7 +14,7 @@ const colorVariantSchema = z.object({
 const putSchema = z.object({
   name:           z.string().min(1),
   description:    z.string().optional().default(""),
-  category:       z.enum(["remeras", "pantalones", "buzos", "accesorios", "calzado"]),
+  category:       z.enum(["remeras", "pantalones", "buzos", "vestidos", "accesorios", "calzado"]),
   price_sale:     z.number().positive(),
   price_cost:     z.number().positive(),
   stock:          stockSchema,

@@ -2,6 +2,7 @@ export type ProductCategory =
   | "remeras"
   | "pantalones"
   | "buzos"
+  | "vestidos"
   | "accesorios"
   | "calzado";
 
